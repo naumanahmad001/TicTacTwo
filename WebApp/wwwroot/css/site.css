@@ -1,0 +1,60 @@
+html {
+  font-size: 14px;
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+  margin-bottom: 60px;
+}
+
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    grid-template-rows: repeat(6, 1fr);
+    gap: 0; /* Remove gaps between cells */
+    width: 240px; /* Set a fixed size for the grid */
+    height: 240px; /* Maintain a square grid */
+    margin-bottom: 20px;
+}
+
+.cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid black; /* Keep borders for visual distinction */
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.active {
+    background-color: #d0f0d0;
+}
+
+.cell.taken {
+    pointer-events: none;
+    background-color: #f0f0f0;
+}
+
+.controls {
+    margin-top: 20px;
+}
+
+    .controls button {
+        margin: 5px;
+    }

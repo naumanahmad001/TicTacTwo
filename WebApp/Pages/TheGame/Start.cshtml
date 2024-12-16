@@ -1,0 +1,30 @@
+﻿@page
+@model WebApp.Pages.TheGame.StartModel
+
+@{
+    Layout = "_Layout";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Game Menu</title>
+</head>
+<body>
+<div class="text-center">
+    <p>Choose an option to start:</p>
+
+    <div>
+        <form method="post">
+            <button type="submit" name="action" value="new-game" class="btn btn-primary">New Game</button>
+        </form>
+
+        <form method="post">
+            <button type="submit" name="action" value="load-game" class="btn btn-secondary">Load Game</button>
+        </form>
+    </div>
+</div>
+</body>
+</html>

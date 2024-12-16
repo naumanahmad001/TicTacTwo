@@ -1,0 +1,33 @@
+﻿@page
+@model WebApp.Pages.TheGame.LoadConfigModel
+
+@{
+    Layout = "_Layout";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Load Config</title>
+</head>
+<body>
+<div class="text-center">
+    <h1>Select a Configuration to Load</h1>
+
+    <form method="post">
+        <div class="form-group">
+            <label for="configSelect">Choose a Configuration</label>
+            <select id="configSelect" name="selectedConfig" class="form-control">
+                @foreach (var config in Model.Configurations)
+                {
+                    <option value="@config.Id">@config.ConfigName</option>
+                }
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Start game</button>
+    </form>
+</div>
+</body>
+</html>

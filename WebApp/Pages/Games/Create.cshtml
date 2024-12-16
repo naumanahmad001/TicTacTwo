@@ -1,0 +1,68 @@
+@page
+@model WebApp.Pages_Games.CreateModel
+
+        @{
+        ViewData["Title"] = "Create";
+        }
+        
+        <h1>Create</h1>
+        
+    <h4>Game</h4>
+    <hr />
+    <div class="row">
+    <div class="col-md-4">
+    <form method="post">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Game.GameName" class="control-label"></label>
+                <input asp-for="Game.GameName" class="form-control" />
+                <span asp-validation-for="Game.GameName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Game.GridTopLeft" class="control-label"></label>
+                <input asp-for="Game.GridTopLeft" class="form-control" />
+                <span asp-validation-for="Game.GridTopLeft" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Game.PositionsJson" class="control-label"></label>
+                <input asp-for="Game.PositionsJson" class="form-control" />
+                <span asp-validation-for="Game.PositionsJson" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Game.ConfigId" class="control-label"></label>
+                <select asp-for="Game.ConfigId" class ="form-control" asp-items="ViewBag.ConfigId"></select>
+            </div>
+            <div class="form-group">
+                <label asp-for="Game.FirstPlayerPassword" class="control-label"></label>
+                <input asp-for="Game.FirstPlayerPassword" class="form-control" />
+                <span asp-validation-for="Game.FirstPlayerPassword" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Game.SecondPlayerPassword" class="control-label"></label>
+                <input asp-for="Game.SecondPlayerPassword" class="form-control" />
+                <span asp-validation-for="Game.SecondPlayerPassword" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Game.CreatedAt" class="control-label"></label>
+                <input asp-for="Game.CreatedAt" class="form-control" />
+                <span asp-validation-for="Game.CreatedAt" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Game.ModifiedAt" class="control-label"></label>
+                <input asp-for="Game.ModifiedAt" class="form-control" />
+                <span asp-validation-for="Game.ModifiedAt" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-page="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
