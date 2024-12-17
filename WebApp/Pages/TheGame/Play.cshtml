@@ -6,18 +6,66 @@
 
 
 <script src="~/lib/jquery/dist/jquery.min.js"></script>
-<div class="container">
-    <h1>Tic Tac Two</h1>
-    <div id="grid" class="grid"></div>
-    <div class="controls">
-        <button id="move-up">Move Up</button>
-        <button id="move-down">Move Down</button>
-        <button id="move-left">Move Left</button>
-        <button id="move-right">Move Right</button>
-        <button id="reset-game">Reset Game</button>
+<div class="container d-flex flex-column justify-content-center align-items-center text-center">
+    <!-- Title -->
+    <h1 class="mb-4">Tic Tac Two</h1>
+
+    <!-- Grid Section -->
+    <div id="grid" class="grid mb-4"></div>
+
+    <!-- Controls Section -->
+    <div class="controls text-center my-4">
+        <div class="row justify-content-center">
+            <!-- Move Up Button -->
+            <div class="col-12 mb-2">
+                <button id="move-up" class="btn btn-primary btn-lg">
+                    <i class="fas fa-arrow-up"></i>
+                </button>
+            </div>
+            <!-- Left, Reset, Right Buttons -->
+            <div class="col-12 d-flex justify-content-center">
+                <button id="move-left" class="btn btn-primary btn-lg me-2">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <button id="reset-game" class="btn btn-danger btn-lg mx-2">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+                <button id="move-right" class="btn btn-primary btn-lg ms-2">
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+            <!-- Move Down Button -->
+            <div class="col-12 mt-2">
+                <button id="move-down" class="btn btn-primary btn-lg">
+                    <i class="fas fa-arrow-down"></i>
+                </button>
+            </div>
+        </div>
     </div>
-   
 </div>
+
+<!-- Winning Modal -->
+<div class="modal fade" id="winningModal" tabindex="-1" aria-labelledby="winningModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="winningModalLabel">Congratulations!</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <h3 id="winner-message" class="mb-4"></h3>
+                <!-- Fireworks Container -->
+                <div id="fireworks-container" style="position: relative; height: 200px; overflow: hidden;">
+                    <!-- Fireworks will appear here -->
+                </div>
+            </div>
+            <div class="modal-footer justify-content-center">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Play Again</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 <script>
     $(document).ready(function () {
@@ -154,10 +202,25 @@
 
             // If there's a win, announce it and reset
             if (win) {
-                alert(`Player ${currentPlayer + 1} (${symbol}) wins!`);
+                showWinningModal(currentPlayer, symbol);
+                //alert(`Player ${currentPlayer + 1} (${symbol}) wins!`);
                 $('#reset-game').trigger('click');
             }
         }
+
+                    // Replace the alert with this
+            function showWinningModal(winningPlayer, symbol) {
+                // Set the winner message dynamically
+                $("#winner-message").html(`🎉 Player ${winningPlayer + 1} (${symbol}) wins! 🎉`);
+    
+                // Show the modal
+                $("#winningModal").modal("show");
+
+                // Trigger fireworks
+                //startFireworks();
+            }
+
+
     });
 
     

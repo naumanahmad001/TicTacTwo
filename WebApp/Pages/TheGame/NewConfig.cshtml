@@ -1,0 +1,42 @@
+﻿@page
+@model NewConfigModel
+@{
+    ViewData["Title"] = "Add New Configuration";
+}
+
+<h2>Add New Configuration</h2>
+
+<form method="post">
+    <div class="form-group">
+        <label for="ConfigName">Configuration Name</label>
+        <input type="text" id="ConfigName" name="Config.ConfigName" class="form-control" required />
+    </div>
+
+    <div class="form-group">
+        <label for="BoardSize">Matrix Size</label>
+        <input type="number" id="BoardSize" name="Config.BoardSize" class="form-control" min="3" required />
+    </div>
+
+    <div class="form-group">
+        <label for="GridSize">Grid Size</label>
+        <input type="number" id="GridSize" name="Config.GridSize" class="form-control" min="3" required />
+    </div>
+
+    <div class="form-group">
+        <label for="PiecesAmount">Pieces Amount</label>
+        <input type="number" id="PiecesAmount" name="Config.PiecesAmount" class="form-control" min="1" required />
+    </div>
+
+    <div class="form-group">
+        <label for="PlayerOnePiece">Player One Piece</label>
+        <input type="text" id="PlayerOnePiece" name="Config.PlayerOnePiece" class="form-control" maxlength="1" required />
+    </div>
+
+    <div class="form-group">
+        <label for="PlayerTwoPiece">Player Two Piece</label>
+        <input type="text" id="PlayerTwoPiece" name="Config.PlayerTwoPiece" class="form-control" maxlength="1" required />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Save Configuration</button>
+    <a asp-page="/Index" class="btn btn-secondary">Cancel</a>
+</form>
