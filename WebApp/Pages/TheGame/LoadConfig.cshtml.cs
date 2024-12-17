@@ -28,7 +28,7 @@ namespace WebApp.Pages.TheGame
                 return Page();
             }
             
-            return RedirectToPage("/TheGame/StartPlay", new { configId = selectedConfig });
+            return RedirectToPage("/TheGame/Play", new { configId = selectedConfig });
         }
     }
 }

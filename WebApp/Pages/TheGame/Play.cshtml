@@ -5,14 +5,161 @@
 }
 
 
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
 <div class="container">
-    <h1>Tic Tac Two - Moveable Matrix</h1>
+    <h1>Tic Tac Two</h1>
     <div id="grid" class="grid"></div>
     <div class="controls">
         <button id="move-up">Move Up</button>
         <button id="move-down">Move Down</button>
         <button id="move-left">Move Left</button>
         <button id="move-right">Move Right</button>
+        <button id="reset-game">Reset Game</button>
     </div>
-    <button id="reset" style="margin-top: 20px;">Reset</button>
+   
 </div>
+
+<script>
+    $(document).ready(function () {
+        const config = @Html.Raw(Json.Serialize(Model.GameConfig)); // Inject game config into JS
+
+        const gridSize = config.gridSize;        // Use camelCase
+        const matrixSize = config.boardSize;     // Use camelCase
+        const playerSymbols = [config.playerOnePiece, config.playerTwoPiece];
+
+        let currentPlayer = 0;                   // Start with player 1
+        let matrixStartRow = 0;
+        let matrixStartCol = 0;
+
+        // Initialize the grid
+        const $grid = $('#grid');
+        $grid.css({
+            'grid-template-columns': `repeat(${gridSize}, 1fr)`,
+            'grid-template-rows': `repeat(${gridSize}, 1fr)`,
+        });
+
+        // Generate grid dynamically
+        for (let i = 0; i < gridSize; i++) {
+            for (let j = 0; j < gridSize; j++) {
+                const $cell = $('<div class="cell" data-row="' + i + '" data-col="' + j + '"></div>');
+                $grid.append($cell);
+            }
+        }
+
+        // Highlight active matrix
+        function highlightMatrix() {
+            $('.cell').removeClass('active');
+            for (let i = matrixStartRow; i < matrixStartRow + matrixSize; i++) {
+                for (let j = matrixStartCol; j < matrixStartCol + matrixSize; j++) {
+                    $('[data-row="' + i + '"][data-col="' + j + '"]').addClass('active');
+                }
+            }
+        }
+
+        // Check if move is valid
+        function isValidMove(rowOffset, colOffset) {
+            const newRowStart = matrixStartRow + rowOffset;
+            const newColStart = matrixStartCol + colOffset;
+            return (
+                newRowStart >= 0 &&
+                newColStart >= 0 &&
+                newRowStart + matrixSize <= gridSize &&
+                newColStart + matrixSize <= gridSize
+            );
+        }
+
+        // Move matrix
+        function moveMatrix(rowOffset, colOffset) {
+            if (isValidMove(rowOffset, colOffset)) {
+                matrixStartRow += rowOffset;
+                matrixStartCol += colOffset;
+                highlightMatrix();
+            }
+        }
+
+        // Handle cell clicks
+        $('.cell').on('click', function () {
+            const $cell = $(this);
+
+            if ($cell.hasClass('active') && !$cell.hasClass('taken')) {
+                $cell.text(playerSymbols[currentPlayer]);
+                $cell.addClass('taken');
+
+                checkWin(); // Check if the current player has won
+
+                currentPlayer = 1 - currentPlayer; // Switch player
+            }
+        });
+
+        // Reset Game Functionality
+        $('#reset-game').on('click', function () {
+            $('.cell').text('')                 // Clear all cell text
+                .removeClass('taken');    // Remove 'taken' class
+            currentPlayer = 0;                  // Reset to player 1
+            matrixStartRow = 0;                 // Reset matrix position
+            matrixStartCol = 0;
+            highlightMatrix();                  // Re-highlight matrix
+        });
+
+        // Movement buttons
+        $('#move-up').on('click', function () {
+            moveMatrix(-1, 0);
+        });
+        $('#move-down').on('click', function () {
+            moveMatrix(1, 0);
+        });
+        $('#move-left').on('click', function () {
+            moveMatrix(0, -1);
+        });
+        $('#move-right').on('click', function () {
+            moveMatrix(0, 1);
+        });
+
+        // Initial matrix highlight
+        highlightMatrix();
+
+        function checkWin() {
+            const symbol = playerSymbols[currentPlayer];
+            let win = false;
+
+            // Check rows and columns within the active matrix
+            for (let i = 0; i < matrixSize; i++) {
+                let rowWin = true, colWin = true;
+
+                for (let j = 0; j < matrixSize; j++) {
+                    const rowCell = $('[data-row="' + (matrixStartRow + i) + '"][data-col="' + (matrixStartCol + j) + '"]');
+                    const colCell = $('[data-row="' + (matrixStartRow + j) + '"][data-col="' + (matrixStartCol + i) + '"]');
+
+                    if (rowCell.text() !== symbol) rowWin = false;
+                    if (colCell.text() !== symbol) colWin = false;
+                }
+
+                if (rowWin || colWin) {
+                    win = true;
+                    break;
+                }
+            }
+
+            // Check diagonals
+            let diag1Win = true, diag2Win = true;
+            for (let i = 0; i < matrixSize; i++) {
+                const diag1Cell = $('[data-row="' + (matrixStartRow + i) + '"][data-col="' + (matrixStartCol + i) + '"]');
+                const diag2Cell = $('[data-row="' + (matrixStartRow + i) + '"][data-col="' + (matrixStartCol + matrixSize - 1 - i) + '"]');
+
+                if (diag1Cell.text() !== symbol) diag1Win = false;
+                if (diag2Cell.text() !== symbol) diag2Win = false;
+            }
+
+            if (diag1Win || diag2Win) win = true;
+
+            // If there's a win, announce it and reset
+            if (win) {
+                alert(`Player ${currentPlayer + 1} (${symbol}) wins!`);
+                $('#reset-game').trigger('click');
+            }
+        }
+    });
+
+    
+
+</script>
