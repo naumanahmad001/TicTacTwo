@@ -71,8 +71,8 @@
     $(document).ready(function () {
         const config = @Html.Raw(Json.Serialize(Model.GameConfig)); // Inject game config into JS
 
-        const gridSize = config.gridSize;        // Use camelCase
-        const matrixSize = config.boardSize;     // Use camelCase
+        const boardSize = config.boardSize;        // Use boardSize for overall grid size
+        const gridSize = config.gridSize;         // Use gridSize for the smaller matrix
         const playerSymbols = [config.playerOnePiece, config.playerTwoPiece];
 
         let currentPlayer = 0;                   // Start with player 1
@@ -82,13 +82,13 @@
         // Initialize the grid
         const $grid = $('#grid');
         $grid.css({
-            'grid-template-columns': `repeat(${gridSize}, 1fr)`,
-            'grid-template-rows': `repeat(${gridSize}, 1fr)`,
+            'grid-template-columns': `repeat(${boardSize}, 1fr)`,
+            'grid-template-rows': `repeat(${boardSize}, 1fr)`,
         });
 
         // Generate grid dynamically
-        for (let i = 0; i < gridSize; i++) {
-            for (let j = 0; j < gridSize; j++) {
+        for (let i = 0; i < boardSize; i++) {
+            for (let j = 0; j < boardSize; j++) {
                 const $cell = $('<div class="cell" data-row="' + i + '" data-col="' + j + '"></div>');
                 $grid.append($cell);
             }
@@ -97,8 +97,8 @@
         // Highlight active matrix
         function highlightMatrix() {
             $('.cell').removeClass('active');
-            for (let i = matrixStartRow; i < matrixStartRow + matrixSize; i++) {
-                for (let j = matrixStartCol; j < matrixStartCol + matrixSize; j++) {
+            for (let i = matrixStartRow; i < matrixStartRow + gridSize; i++) {
+                for (let j = matrixStartCol; j < matrixStartCol + gridSize; j++) {
                     $('[data-row="' + i + '"][data-col="' + j + '"]').addClass('active');
                 }
             }
@@ -111,8 +111,8 @@
             return (
                 newRowStart >= 0 &&
                 newColStart >= 0 &&
-                newRowStart + matrixSize <= gridSize &&
-                newColStart + matrixSize <= gridSize
+                newRowStart + gridSize <= boardSize &&
+                newColStart + gridSize <= boardSize
             );
         }
 
@@ -171,10 +171,10 @@
             let win = false;
 
             // Check rows and columns within the active matrix
-            for (let i = 0; i < matrixSize; i++) {
+            for (let i = 0; i < gridSize; i++) {
                 let rowWin = true, colWin = true;
 
-                for (let j = 0; j < matrixSize; j++) {
+                for (let j = 0; j < gridSize; j++) {
                     const rowCell = $('[data-row="' + (matrixStartRow + i) + '"][data-col="' + (matrixStartCol + j) + '"]');
                     const colCell = $('[data-row="' + (matrixStartRow + j) + '"][data-col="' + (matrixStartCol + i) + '"]');
 
@@ -190,9 +190,9 @@
 
             // Check diagonals
             let diag1Win = true, diag2Win = true;
-            for (let i = 0; i < matrixSize; i++) {
+            for (let i = 0; i < gridSize; i++) {
                 const diag1Cell = $('[data-row="' + (matrixStartRow + i) + '"][data-col="' + (matrixStartCol + i) + '"]');
-                const diag2Cell = $('[data-row="' + (matrixStartRow + i) + '"][data-col="' + (matrixStartCol + matrixSize - 1 - i) + '"]');
+                const diag2Cell = $('[data-row="' + (matrixStartRow + i) + '"][data-col="' + (matrixStartCol + gridSize - 1 - i) + '"]');
 
                 if (diag1Cell.text() !== symbol) diag1Win = false;
                 if (diag2Cell.text() !== symbol) diag2Win = false;
@@ -203,26 +203,20 @@
             // If there's a win, announce it and reset
             if (win) {
                 showWinningModal(currentPlayer, symbol);
-                //alert(`Player ${currentPlayer + 1} (${symbol}) wins!`);
                 $('#reset-game').trigger('click');
             }
         }
 
-                    // Replace the alert with this
-            function showWinningModal(winningPlayer, symbol) {
+            // Replace the alert with this
+        function showWinningModal(winningPlayer, symbol) {
                 // Set the winner message dynamically
                 $("#winner-message").html(`🎉 Player ${winningPlayer + 1} (${symbol}) wins! 🎉`);
-    
+
                 // Show the modal
                 $("#winningModal").modal("show");
 
-                // Trigger fireworks
+                // Trigger fireworks (if needed)
                 //startFireworks();
             }
-
-
-    });
-
-    
-
+        });
 </script>
