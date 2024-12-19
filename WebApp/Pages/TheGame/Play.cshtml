@@ -67,16 +67,19 @@
 </div>
 
 
+
 <script>
     $(document).ready(function () {
+        // Inject values from backend
+        const savedPieces = @Html.Raw(Json.Serialize(Model.SavedPieces));
         const config = @Html.Raw(Json.Serialize(Model.GameConfig)); // Inject game config into JS
-
-        const boardSize = config.boardSize;        // Use boardSize for overall grid size
-        const gridSize = config.gridSize;         // Use gridSize for the smaller matrix
+        const isNewGame = @Model.IsNewGame.ToString().ToLower(); // Check if the game is new or loaded
+        const boardSize = config.boardSize;        // Overall grid size
+        const gridSize = config.gridSize;         // Smaller matrix size
         const playerSymbols = [config.playerOnePiece, config.playerTwoPiece];
 
         let currentPlayer = 0;                   // Start with player 1
-        let matrixStartRow = 0;
+        let matrixStartRow = 0;                  // Initial matrix top-left position
         let matrixStartCol = 0;
 
         // Initialize the grid
@@ -86,7 +89,7 @@
             'grid-template-rows': `repeat(${boardSize}, 1fr)`,
         });
 
-        // Generate grid dynamically
+        // Generate the grid dynamically
         for (let i = 0; i < boardSize; i++) {
             for (let j = 0; j < boardSize; j++) {
                 const $cell = $('<div class="cell" data-row="' + i + '" data-col="' + j + '"></div>');
@@ -104,7 +107,20 @@
             }
         }
 
-        // Check if move is valid
+        // Place saved pieces if the game is loaded
+        if (!isNewGame) {
+            // Place saved pieces on the grid
+            Object.keys(savedPieces).forEach(key => {
+                const [row, col] = key.split(',').map(Number); // Parse the string key back into row, col
+                const symbol = savedPieces[key];
+
+                // Find the corresponding cell and set the symbol
+                const $cell = $(`[data-row='${row}'][data-col='${col}']`);
+                $cell.text(symbol).addClass('taken');
+            });
+        }
+
+        // Validate if move is valid
         function isValidMove(rowOffset, colOffset) {
             const newRowStart = matrixStartRow + rowOffset;
             const newColStart = matrixStartCol + colOffset;
@@ -137,14 +153,15 @@
 
                 currentPlayer = 1 - currentPlayer; // Switch player
             }
-            // Update the positions dictionary
+
+            // Save game state after each move
             saveGameStateToServer();
         });
 
         // Reset Game Functionality
         $('#reset-game').on('click', function () {
             $('.cell').text('')                 // Clear all cell text
-                .removeClass('taken');    // Remove 'taken' class
+                .removeClass('taken');          // Remove 'taken' class
             currentPlayer = 0;                  // Reset to player 1
             matrixStartRow = 0;                 // Reset matrix position
             matrixStartCol = 0;
@@ -168,6 +185,7 @@
         // Initial matrix highlight
         highlightMatrix();
 
+        // Check win conditions
         function checkWin() {
             const symbol = playerSymbols[currentPlayer];
             let win = false;
@@ -208,56 +226,47 @@
                 $('#reset-game').trigger('click');
             }
         }
+
+        // Save game state to server
         function saveGameStateToServer() {
-    const positions = {};
-    const topLeftRow = matrixStartRow; // Top-left row of active grid
-    const topLeftCol = matrixStartCol;
+            const positions = {};
+            $('.cell').each(function () {
+                const row = $(this).data('row');
+                const col = $(this).data('col');
+                const text = $(this).text();
 
-    // Serialize grid positions
-    $('.cell').each(function () {
-        const row = $(this).data('row');
-        const col = $(this).data('col');
-        const text = $(this).text();
+                if (text) {
+                    positions[`${row},${col}`] = text;
+                }
+            });
 
-        if (text) {
-            positions[`${row},${col}`] = text;
+            const payload = {
+                gameSaveName: document.getElementById("gameName").value,
+                positions: positions,
+                grid: {
+                    topLeft: `${matrixStartRow},${matrixStartCol}`
+                }
+            };
+
+            $.ajax({
+                url: '/api/Game/SaveTempGameState',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(payload),
+                success: function () {
+                    console.log("Game state saved successfully");
+                },
+                error: function (err) {
+                    console.error("Failed to save game state:", err);
+                }
+            });
         }
-    });
 
-    // Prepare payload
-            const gameName = document.getElementById("gameName").value;
-    const payload = {
-                gameSaveName: gameName, // You can dynamically generate this
-        positions: positions,
-        grid: {
-            topLeft: `${topLeftRow},${topLeftCol}`
-        }
-    };
-
-    // Send updated state to backend
-    $.ajax({
-                url: '/api/Game/SaveTempGameState', // Endpoint
-        type: 'POST',
-        contentType: 'application/json',
-        data: JSON.stringify(payload),
-        success: function (response) {
-            console.log("Game state saved successfully");
-        },
-        error: function (err) {
-            console.error("Failed to save game state:", err);
-        }
-    });
-}
-            // Replace the alert with this
+        // Show winning modal
         function showWinningModal(winningPlayer, symbol) {
-                // Set the winner message dynamically
-                $("#winner-message").html(`🎉 Player ${winningPlayer + 1} (${symbol}) wins! 🎉`);
-
-                // Show the modal
-                $("#winningModal").modal("show");
-
-                // Trigger fireworks (if needed)
-                //startFireworks();
-            }
-        });
+            $("#winner-message").html(`🎉 Player ${winningPlayer + 1} (${symbol}) wins! 🎉`);
+            $("#winningModal").modal("show");
+        }
+    });
 </script>
+

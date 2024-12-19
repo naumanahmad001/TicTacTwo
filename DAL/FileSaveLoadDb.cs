@@ -154,7 +154,7 @@ namespace DAL
 
                 if (existingGame != null)
                 {
-                    existingGame.ConfigId = config.Id;
+                    //existingGame.ConfigId = config.Id;
                     existingGame.PositionsJson = JsonConvert.SerializeObject(pieces); // Updating PositionsJson
                     existingGame.GridTopLeft = gridTopLeft; // Updating GridTopLeft
                     existingGame.FirstPlayerPassword = firstPlayerPassword; // Updating password for the first player

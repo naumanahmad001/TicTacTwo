@@ -36,7 +36,7 @@ namespace WebApp.Controllers
                
                 fileSaveLoad.SaveTempGameState(positions, grid, request.GameSaveName);
                 
-                string saveResult = fileSaveLoad.SaveGameState(_customConfig, piecePositions, grid, gameSaveName, _customConfig.ConfigName);
+                string saveResult = fileSaveLoad.SaveGameState(new CustomConfig(), positions, grid, request.GameSaveName, string.Empty);
                 return Json(new { success = true });
             }
             catch (Exception ex)

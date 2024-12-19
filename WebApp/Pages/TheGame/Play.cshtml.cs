@@ -4,6 +4,7 @@ using Domain;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 
 namespace WebApp.Pages.TheGame
 {
@@ -17,20 +18,26 @@ namespace WebApp.Pages.TheGame
         }
         public Config GameConfig { get; set; } = default!;
         public string GameName { get; set; }
+        public bool IsNewGame { get; set; }
+        public Dictionary<string, char> SavedPieces { get; set; } = new Dictionary<string, char>();
+
         public IActionResult OnGet(string? gameName, int? configId, string? gameId)
         {
             if (!string.IsNullOrEmpty(gameId))
             {
                 // Load game by gameId
                 var game = gameLoader.LoadGame(gameId);
-
-                //var config = _context.Configurations
-                //.FirstOrDefault(c => c.Id == game.config);
-                //GameConfig = game.config; // Assuming the loaded game has a GameConfig
-                //GameName = game.gam;     // Assuming the loaded game has a GameName
+                IsNewGame = false;
+                SavedPieces = game.pieces.ToDictionary(
+       kvp => $"{kvp.Key.Item1},{kvp.Key.Item2}", // Convert tuple keys to "row,col" strings
+       kvp => kvp.Value
+   );
+                GameConfig = _context.Configurations.FirstOrDefault(c => c.ConfigName == game.config.ConfigName);
+                GameName = gameId;
             }
             else if (!string.IsNullOrEmpty(gameName) && configId.HasValue)
             {
+                IsNewGame = true;
                 // Load game configuration by configId
                 GameConfig = _context.Configurations.FirstOrDefault(a => a.Id == configId.Value);
                 if (GameConfig == null)
