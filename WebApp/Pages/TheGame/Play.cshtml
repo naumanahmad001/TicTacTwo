@@ -79,8 +79,7 @@
         const playerSymbols = [config.playerOnePiece, config.playerTwoPiece];
 
         let currentPlayer = 0;                   // Start with player 1
-        let matrixStartRow = 0;                  // Initial matrix top-left position
-        let matrixStartCol = 0;
+       
 
         // Initialize the grid
         const $grid = $('#grid');
@@ -153,7 +152,6 @@
 
                 currentPlayer = 1 - currentPlayer; // Switch player
             }
-
             // Save game state after each move
             saveGameStateToServer();
         });
@@ -228,39 +226,7 @@
         }
 
         // Save game state to server
-        function saveGameStateToServer() {
-            const positions = {};
-            $('.cell').each(function () {
-                const row = $(this).data('row');
-                const col = $(this).data('col');
-                const text = $(this).text();
-
-                if (text) {
-                    positions[`${row},${col}`] = text;
-                }
-            });
-
-            const payload = {
-                gameSaveName: document.getElementById("gameName").value,
-                positions: positions,
-                grid: {
-                    topLeft: `${matrixStartRow},${matrixStartCol}`
-                }
-            };
-
-            $.ajax({
-                url: '/api/Game/SaveTempGameState',
-                type: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify(payload),
-                success: function () {
-                    console.log("Game state saved successfully");
-                },
-                error: function (err) {
-                    console.error("Failed to save game state:", err);
-                }
-            });
-        }
+        
 
         // Show winning modal
         function showWinningModal(winningPlayer, symbol) {

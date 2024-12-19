@@ -2,11 +2,13 @@
 const hubConnection = new signalR.HubConnectionBuilder()
     .withUrl("/gamehub")
     .build();
+hubConnection.start();
 
 let playerName = "";
 let gridSize = 6; // Default grid size
 let isPlayerTurn = false;
-
+let matrixStartRow = 0;                  // Initial matrix top-left position
+let matrixStartCol = 0;
 // Initialize Grid
 function initializeGrid() {
     const grid = document.getElementById("grid");
@@ -26,6 +28,40 @@ function initializeGrid() {
     }
 }
 
+function saveGameStateToServer() {
+    const positions = {};
+    $('.cell').each(function () {
+        const row = $(this).data('row');
+        const col = $(this).data('col');
+        const text = $(this).text();
+
+        if (text) {
+            positions[`${row},${col}`] = text;
+        }
+    });
+
+    const payload = {
+        gameSaveName: document.getElementById("gameName").value,
+        positions: positions,
+        grid: {
+            topLeft: `${matrixStartRow},${matrixStartCol}`
+        }
+    };
+
+    $.ajax({
+        url: '/api/Game/SaveTempGameState',
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(payload),
+        success: function () {
+            console.log("Game state saved successfully");
+            hubConnection.invoke("NotifyMove", `${playerName} has made a move.`);
+        },
+        error: function (err) {
+            console.error("Failed to save game state:", err);
+        }
+    });
+}
 // Handle joining the game
 document.getElementById("join-game").addEventListener("click", () => {
     playerName = prompt("Enter your name:");
@@ -77,6 +113,7 @@ hubConnection.on("ReceiveState", (gameState) => {
 // Notification for moves
 hubConnection.on("MoveNotification", (message) => {
     document.getElementById("status").innerText = message;
+    window.location = window.location.href;
 });
 
 // Player joined notification
