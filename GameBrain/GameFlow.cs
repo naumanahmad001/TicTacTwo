@@ -81,7 +81,7 @@ public static void CreateNewGame()
     gameSaveName = name;
 
     IFileSaveLoad fileSaveLoad = FileSaveLoadFactory.GetFileSaveLoadImplementation();
-    fileSaveLoad.SaveInitialGame(name);
+    fileSaveLoad.SaveInitialGame(name,1);
 
 
 }

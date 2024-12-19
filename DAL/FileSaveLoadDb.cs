@@ -282,13 +282,13 @@ namespace DAL
         
         
 
-        public void SaveInitialGame(string saveName)
+        public void SaveInitialGame(string saveName, int configId)
         {
 
             var newGame = new Game
             {
                 GameName = saveName,
-                ConfigId = null,
+                ConfigId = configId,
                 PositionsJson = null,
                 GridTopLeft = null,
                 FirstPlayerPassword = null,

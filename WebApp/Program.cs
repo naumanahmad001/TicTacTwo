@@ -1,5 +1,6 @@
 using DAL;
 using Microsoft.EntityFrameworkCore;
+using WebApp.SignalR;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,7 +17,7 @@ connectionString = connectionString.Replace("<%location%>", FileHelper.BasePath)
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddRazorPages();
-
+builder.Services.AddSignalR();
 
 
 
@@ -35,10 +36,18 @@ app.UseHttpsRedirection();
 app.MapStaticAssets();
 
 app.UseRouting();
-
 app.UseAuthorization();
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapControllerRoute(
+        name: "default",
+        pattern: "{controller=Home}/{action=Index}/{id?}");
+    endpoints.MapControllers(); 
+});
+
+
 
 app.MapRazorPages()
     .WithStaticAssets();
-
+app.MapHub<GameHub>("/gamehub");
 app.Run();

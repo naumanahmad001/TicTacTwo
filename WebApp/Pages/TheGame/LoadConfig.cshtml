@@ -26,8 +26,17 @@
                 }
             </select>
         </div>
-        <button type="submit" class="btn btn-primary">Start game</button>
+            <div class="form-group">
+                <label for="gameName">Game Name</label>
+                <input id="gameName" asp-for="GameName" class="form-control" />
+                <span asp-validation-for="GameName" class="text-danger"></span>
+            </div>
+
+            <button type="submit" class="btn btn-primary mt-2">Start Game</button>
     </form>
 </div>
+    @section Scripts {
+        <partial name="_ValidationScriptsPartial" />
+    }
 </body>
 </html>

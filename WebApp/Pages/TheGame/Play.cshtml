@@ -8,8 +8,8 @@
 <script src="~/lib/jquery/dist/jquery.min.js"></script>
 <div class="container d-flex flex-column justify-content-center align-items-center text-center">
     <!-- Title -->
-    <h1 class="mb-4">Tic Tac Two</h1>
-
+    <h1 class="mb-4">Tic Tac Two - @Model.GameName</h1>
+    <input type="hidden" id="gameName" value="@Model.GameName" />
     <!-- Grid Section -->
     <div id="grid" class="grid mb-4"></div>
 
@@ -137,6 +137,8 @@
 
                 currentPlayer = 1 - currentPlayer; // Switch player
             }
+            // Update the positions dictionary
+            saveGameStateToServer();
         });
 
         // Reset Game Functionality
@@ -206,7 +208,46 @@
                 $('#reset-game').trigger('click');
             }
         }
+        function saveGameStateToServer() {
+    const positions = {};
+    const topLeftRow = matrixStartRow; // Top-left row of active grid
+    const topLeftCol = matrixStartCol;
 
+    // Serialize grid positions
+    $('.cell').each(function () {
+        const row = $(this).data('row');
+        const col = $(this).data('col');
+        const text = $(this).text();
+
+        if (text) {
+            positions[`${row},${col}`] = text;
+        }
+    });
+
+    // Prepare payload
+            const gameName = document.getElementById("gameName").value;
+    const payload = {
+                gameSaveName: gameName, // You can dynamically generate this
+        positions: positions,
+        grid: {
+            topLeft: `${topLeftRow},${topLeftCol}`
+        }
+    };
+
+    // Send updated state to backend
+    $.ajax({
+                url: '/api/Game/SaveTempGameState', // Endpoint
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(payload),
+        success: function (response) {
+            console.log("Game state saved successfully");
+        },
+        error: function (err) {
+            console.error("Failed to save game state:", err);
+        }
+    });
+}
             // Replace the alert with this
         function showWinningModal(winningPlayer, symbol) {
                 // Set the winner message dynamically
