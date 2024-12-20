@@ -20,6 +20,8 @@ namespace WebApp.Pages.TheGame
         public string GameName { get; set; }
         public bool IsNewGame { get; set; }
         public string MyPiece { get; set; }
+        public int MatrixStartRow { get; set; }
+        public int MatrixStartColumn { get; set; }
         public Dictionary<string, char> SavedPieces { get; set; } = new Dictionary<string, char>();
 
         public IActionResult OnGet(string? gameName, int? configId, string? gameId, string? myPiece)
@@ -40,6 +42,18 @@ namespace WebApp.Pages.TheGame
                 GameConfig = _context.Configurations.FirstOrDefault(c => c.ConfigName == game.config.ConfigName);
                 GameName = gameId;
                 MyPiece = myPiece;
+
+                if (game.grid == null)
+                {
+                    MatrixStartRow = 0;
+                    MatrixStartColumn = 0;
+                }
+                else 
+                {
+                    MatrixStartRow = game.grid.TopLeft.Item1;
+                    MatrixStartColumn = game.grid.TopLeft.Item2;
+                }
+                
             }
             //else if (!string.IsNullOrEmpty(gameName) && configId.HasValue)
             //{

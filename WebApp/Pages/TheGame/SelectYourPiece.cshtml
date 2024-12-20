@@ -12,10 +12,10 @@
             <label for="SelectedPiece" class="form-label">Choose Your Piece:</label>
             <select class="form-select" id="SelectedPiece" asp-for="SelectedPiece" required>
                 <option value="">Select your piece</option>
-                <option value="X">X</option>
-                <option value="O">O</option>
-                <option value="R">R</option>
-                <option value="L">L</option>
+                @foreach (var piece in Model.ConfigPieces)
+                {
+                    <option value="@piece">@piece</option>
+                }
             </select>
             <span class="text-danger" asp-validation-for="SelectedPiece"></span>
         </div>

@@ -82,8 +82,10 @@
         const gridSize = config.gridSize;         // Smaller matrix size
         const playerSymbols = [config.playerOnePiece, config.playerTwoPiece];
         const myPiece = '@Model.MyPiece.ToString()';
+        matrixStartRow = @Model.MatrixStartRow;
+        matrixStartCol = @Model.MatrixStartColumn;
         let currentPlayer = 0;                   // Start with player 1
-       
+        let isMyTurn = true;
        
         // Initialize the grid
         const $grid = $('#grid');
@@ -110,9 +112,8 @@
             }
         }
         function updateGridStatus() {
-            const isMyTurn = playerSymbols[currentPlayer] === myPiece;
             $grid.toggleClass('disabled', !isMyTurn);
-            $('#is-your-turn').text(isMyTurn ? 'True' : 'False'); // Update turn status
+            $('#is-your-turn').text(isMyTurn == true ? 'True' : 'False'); // Update turn status
         }
 
 
@@ -129,6 +130,8 @@
                 $cell.text(symbol).addClass('taken');
             });
         }
+        updateGridStatus();
+        highlightMatrix();
         checkWin();
         $('#waiting-overlay').hide();
         // Validate if move is valid
@@ -150,6 +153,16 @@
                 matrixStartCol += colOffset;
                 highlightMatrix();
             }
+            const positions = {};
+            $('.cell.taken').each(function () {
+                const row = $(this).data('row');
+                const col = $(this).data('col');
+                const text = $(this).text();
+                positions[`${row},${col}`] = text;
+            });
+
+            const nextPlayer = (currentPlayer + 1) % 2; // Switch player
+            saveGameStateToServer(positions, nextPlayer);
         }
 
         // Handle cell clicks
@@ -174,6 +187,7 @@
                 // Check win after a move
                 checkWin();
                 currentPlayer = nextPlayer; // Update locally
+                isMyTurn = false;
                 updateGridStatus(); // Disable grid for this player
             }
         });
@@ -203,11 +217,10 @@
         });
 
         // Initial matrix highlight
-        highlightMatrix();
 
         // Check win conditions
         function checkWin() {
-            const symbol = playerSymbols[currentPlayer];
+            const symbol = playerSymbols[0];
             let win = false;
 
             // Check rows and columns within the active matrix
@@ -244,6 +257,47 @@
             if (win) {
                 showWinningModal(currentPlayer, symbol);
                 $('#reset-game').trigger('click');
+            }
+            else
+            {
+                const symbol = playerSymbols[1];
+                let win = false;
+
+                // Check rows and columns within the active matrix
+                for (let i = 0; i < gridSize; i++) {
+                    let rowWin = true, colWin = true;
+
+                    for (let j = 0; j < gridSize; j++) {
+                        const rowCell = $('[data-row="' + (matrixStartRow + i) + '"][data-col="' + (matrixStartCol + j) + '"]');
+                        const colCell = $('[data-row="' + (matrixStartRow + j) + '"][data-col="' + (matrixStartCol + i) + '"]');
+
+                        if (rowCell.text() !== symbol) rowWin = false;
+                        if (colCell.text() !== symbol) colWin = false;
+                    }
+
+                    if (rowWin || colWin) {
+                        win = true;
+                        break;
+                    }
+                }
+
+                // Check diagonals
+                let diag1Win = true, diag2Win = true;
+                for (let i = 0; i < gridSize; i++) {
+                    const diag1Cell = $('[data-row="' + (matrixStartRow + i) + '"][data-col="' + (matrixStartCol + i) + '"]');
+                    const diag2Cell = $('[data-row="' + (matrixStartRow + i) + '"][data-col="' + (matrixStartCol + gridSize - 1 - i) + '"]');
+
+                    if (diag1Cell.text() !== symbol) diag1Win = false;
+                    if (diag2Cell.text() !== symbol) diag2Win = false;
+                }
+
+                if (diag1Win || diag2Win) win = true;
+
+                // If there's a win, announce it and reset
+                if (win) {
+                    showWinningModal(currentPlayer, symbol);
+                    $('#reset-game').trigger('click');
+                }
             }
         }
 

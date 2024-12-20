@@ -24,6 +24,7 @@ let gridSize = 6; // Default grid size
 let isPlayerTurn = false;
 let matrixStartRow = 0;                  // Initial matrix top-left position
 let matrixStartCol = 0;
+
 // Initialize Grid
 function initializeGrid() {
     const grid = document.getElementById("grid");

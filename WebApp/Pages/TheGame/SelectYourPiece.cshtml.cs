@@ -1,11 +1,22 @@
+using DAL;
+using Domain;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure;
+using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 
 namespace WebApp.Pages.TheGame
 {
     public class SelectYourPieceModel : PageModel
     {
+        private readonly AppDbContext _context;
+
+        public SelectYourPieceModel(AppDbContext context)
+        {
+            _context = context;
+        }
+        IFileSaveLoad gameLoader = FileSaveLoadFactory.GetFileSaveLoadImplementation();
         [BindProperty]
         [Required(ErrorMessage = "Please select a piece.")]
         public string SelectedPiece { get; set; }
@@ -18,9 +29,19 @@ namespace WebApp.Pages.TheGame
         [BindProperty]
         public string GameName { get; set; }
 
+        public List<string> ConfigPieces { get; set; }
+
         public void OnGet(string gameId)
         {
             GameName = gameId; // Set GameName from query string
+            var game = gameLoader.LoadGame(gameId);
+            Config GameConfig = _context.Configurations.FirstOrDefault(c => c.ConfigName == game.config.ConfigName);
+            if (GameConfig != null)
+            {
+                ConfigPieces = new List<string>();
+                ConfigPieces.Add(GameConfig.PlayerOnePiece);
+                ConfigPieces.Add(GameConfig.PlayerTwoPiece);
+            }
         }
 
         public IActionResult OnPost()
@@ -31,10 +52,8 @@ namespace WebApp.Pages.TheGame
                 return Page();
             }
 
-            // Example logic
-            // IFileSaveLoad fileSaveLoad = FileSaveLoadFactory.GetFileSaveLoadImplementation();
-            // fileSaveLoad.SaveInitialGame(GameName, selectedConfig);
-
+           
+            
             return RedirectToPage("/TheGame/Play", new { gameId = GameName, myPiece = SelectedPiece });
         }
     }
