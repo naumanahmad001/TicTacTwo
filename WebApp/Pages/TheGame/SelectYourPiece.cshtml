@@ -1,0 +1,40 @@
+﻿@page
+@model WebApp.Pages.TheGame.SelectYourPieceModel
+@{
+    Layout = "_Layout";
+}
+
+<div class="container mt-5">
+    <h1 class="text-center">Select Your Piece</h1>
+    <form method="post" class="mt-4">
+        <input type="hidden" asp-for="GameName" />
+        <div class="mb-3">
+            <label for="SelectedPiece" class="form-label">Choose Your Piece:</label>
+            <select class="form-select" id="SelectedPiece" asp-for="SelectedPiece" required>
+                <option value="">Select your piece</option>
+                <option value="X">X</option>
+                <option value="O">O</option>
+                <option value="R">R</option>
+                <option value="L">L</option>
+            </select>
+            <span class="text-danger" asp-validation-for="SelectedPiece"></span>
+        </div>
+
+        <div class="mb-3">
+            <label for="PiecePassword" class="form-label">Enter Code (Password) for Your Piece:</label>
+            <input type="password" class="form-control"
+                   id="PiecePassword"
+                   asp-for="PiecePassword"
+                   required>
+            <span class="text-danger" asp-validation-for="PiecePassword"></span>
+        </div>
+
+        <div class="text-center">
+            <button type="submit" class="btn btn-primary">GO!</button>
+        </div>
+    </form>
+
+    @section Scripts {
+        <partial name="_ValidationScriptsPartial" />
+    }
+</div>

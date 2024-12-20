@@ -243,33 +243,47 @@ namespace DAL
                 return (null, null, null);
             }
 
-            var pieces = JsonConvert.DeserializeObject<Dictionary<string, char>>(game.PositionsJson)
-                .ToDictionary(entry =>
-                    {
-                        var cleanedKey =
-                            entry.Key.Replace("(", "").Replace(")", "").Trim(); // Remove parentheses and trim spaces
-                        var coords = cleanedKey.Split(',');
-                        return (int.Parse(coords[0]), int.Parse(coords[1]));
-                    },
-                    entry => entry.Value);
-
-            var topLeftCoords = game.GridTopLeft.Split(',');
-            var gridTopLeft = (int.Parse(topLeftCoords[0]), int.Parse(topLeftCoords[1]));
-            var grid = new Grid
+            if (game.PositionsJson != null && game.GridTopLeft != null)
             {
-                TopLeft = gridTopLeft,
-                Size = config.GridSize
-            };
+                var pieces = JsonConvert.DeserializeObject<Dictionary<string, char>>(game.PositionsJson)
+                    .ToDictionary(entry =>
+                        {
+                            var cleanedKey =
+                                entry.Key.Replace("(", "").Replace(")", "").Trim(); // Remove parentheses and trim spaces
+                            var coords = cleanedKey.Split(',');
+                            return (int.Parse(coords[0]), int.Parse(coords[1]));
+                        },
+                        entry => entry.Value);
 
-            return (new CustomConfig
-            {
-                ConfigName = config.ConfigName,
-                BoardSize = config.BoardSize,
-                GridSize = config.GridSize,
-                NumPieces = config.PiecesAmount,
-                PlayerOnePiece = config.PlayerOnePiece,
-                PlayerTwoPiece = config.PlayerTwoPiece
-            }, pieces, grid);
+                var topLeftCoords = game.GridTopLeft.Split(',');
+                var gridTopLeft = (int.Parse(topLeftCoords[0]), int.Parse(topLeftCoords[1]));
+                var grid = new Grid
+                {
+                    TopLeft = gridTopLeft,
+                    Size = config.GridSize
+                };
+
+                return (new CustomConfig
+                {
+                    ConfigName = config.ConfigName,
+                    BoardSize = config.BoardSize,
+                    GridSize = config.GridSize,
+                    NumPieces = config.PiecesAmount,
+                    PlayerOnePiece = config.PlayerOnePiece,
+                    PlayerTwoPiece = config.PlayerTwoPiece
+                }, pieces, grid);
+            }
+            else {
+                return (new CustomConfig
+                {
+                    ConfigName = config.ConfigName,
+                    BoardSize = config.BoardSize,
+                    GridSize = config.GridSize,
+                    NumPieces = config.PiecesAmount,
+                    PlayerOnePiece = config.PlayerOnePiece,
+                    PlayerTwoPiece = config.PlayerTwoPiece
+                }, null, null);
+            }
         }
 
         

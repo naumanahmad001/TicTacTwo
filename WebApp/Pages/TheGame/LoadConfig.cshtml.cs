@@ -33,7 +33,7 @@ namespace WebApp.Pages.TheGame
             }
             IFileSaveLoad fileSaveLoad = FileSaveLoadFactory.GetFileSaveLoadImplementation();
             fileSaveLoad.SaveInitialGame(GameName, selectedConfig);
-            return RedirectToPage("/TheGame/Play", new {gameName = GameName, configId = selectedConfig });
+            return RedirectToPage("/TheGame/SelectYourPiece", new { gameId = GameName });
         }
     }
 }

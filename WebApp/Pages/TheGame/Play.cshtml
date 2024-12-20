@@ -4,13 +4,19 @@
     Layout = "_Layout";
 }
 
-
+<style>
+    #grid.disabled {
+        pointer-events: none;
+        opacity: 0.5;
+    }
+</style>
 <script src="~/lib/jquery/dist/jquery.min.js"></script>
 <div class="container d-flex flex-column justify-content-center align-items-center text-center">
     <!-- Title -->
     <h1 class="mb-4">Tic Tac Two - @Model.GameName</h1>
     <input type="hidden" id="gameName" value="@Model.GameName" />
     <!-- Grid Section -->
+    <div> You are playing as: @Model.MyPiece</div>
     <div id="grid" class="grid mb-4"></div>
 
     <!-- Controls Section -->
@@ -70,14 +76,14 @@
 
 <script>
     $(document).ready(function () {
-        // Inject values from backend
+        // Inject values from backend36
         const savedPieces = @Html.Raw(Json.Serialize(Model.SavedPieces));
         const config = @Html.Raw(Json.Serialize(Model.GameConfig)); // Inject game config into JS
         const isNewGame = @Model.IsNewGame.ToString().ToLower(); // Check if the game is new or loaded
         const boardSize = config.boardSize;        // Overall grid size
         const gridSize = config.gridSize;         // Smaller matrix size
         const playerSymbols = [config.playerOnePiece, config.playerTwoPiece];
-
+        const myPiece = '@Model.MyPiece.ToString()';
         let currentPlayer = 0;                   // Start with player 1
        
 
@@ -105,9 +111,16 @@
                 }
             }
         }
-
+        function updateGridStatus() {
+            if (playerSymbols[currentPlayer] === myPiece) {
+                $grid.removeClass('disabled');
+            } else {
+                $grid.addClass('disabled');
+            }
+        }
         // Place saved pieces if the game is loaded
-        if (!isNewGame) {
+        //if (!isNewGame) 
+        {
             // Place saved pieces on the grid
             Object.keys(savedPieces).forEach(key => {
                 const [row, col] = key.split(',').map(Number); // Parse the string key back into row, col
@@ -142,18 +155,27 @@
 
         // Handle cell clicks
         $('.cell').on('click', function () {
+            if ($grid.hasClass('disabled')) return;
+
             const $cell = $(this);
-
             if ($cell.hasClass('active') && !$cell.hasClass('taken')) {
-                $cell.text(playerSymbols[currentPlayer]);
-                $cell.addClass('taken');
+                $cell.text(myPiece).addClass('taken');
 
-                checkWin(); // Check if the current player has won
+                // Save move and notify server
+                const positions = {};
+                $('.cell.taken').each(function () {
+                    const row = $(this).data('row');
+                    const col = $(this).data('col');
+                    const text = $(this).text();
+                    positions[`${row},${col}`] = text;
+                });
 
-                currentPlayer = 1 - currentPlayer; // Switch player
+                const nextPlayer = (currentPlayer + 1) % 2; // Switch player
+                saveGameStateToServer(positions, nextPlayer);
+
+                currentPlayer = nextPlayer; // Update locally
+                updateGridStatus(); // Disable grid for this player
             }
-            // Save game state after each move
-            saveGameStateToServer();
         });
 
         // Reset Game Functionality

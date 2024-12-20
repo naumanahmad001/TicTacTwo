@@ -17,7 +17,7 @@ namespace WebApp.SignalR
 
         public async Task NotifyMove(string message)
         {
-            await Clients.All.SendAsync("MoveNotification", message);
+            await Clients.Others.SendAsync("MoveNotification", message);
         }
     }
 }

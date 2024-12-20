@@ -112,7 +112,7 @@ hubConnection.on("ReceiveState", (gameState) => {
 
 // Notification for moves
 hubConnection.on("MoveNotification", (message) => {
-    document.getElementById("status").innerText = message;
+    //document.getElementById("status").innerText = message;
     window.location = window.location.href;
 });
 

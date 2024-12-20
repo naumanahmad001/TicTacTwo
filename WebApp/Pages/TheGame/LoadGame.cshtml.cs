@@ -37,7 +37,7 @@ namespace WebApp.Pages.TheGame
                 return Page();
             }
             
-            return RedirectToPage("/TheGame/Play", new { gameId = selectedGame });
+            return RedirectToPage("/TheGame/SelectYourPiece", new { gameId = selectedGame });
         }
     }
 }
