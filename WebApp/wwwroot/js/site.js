@@ -1,8 +1,23 @@
-﻿"use strict";
-const hubConnection = new signalR.HubConnectionBuilder()
+﻿const hubConnection = new signalR.HubConnectionBuilder()
     .withUrl("/gamehub")
     .build();
-hubConnection.start();
+//hubConnection.start();
+// Start connection and initialize grid
+hubConnection.start().then(() => {
+    //initializeGrid();
+    console.log("Connection established.");
+}).catch(err => console.error(err));
+
+
+hubConnection.onclose(() => {
+    console.error("SignalR connection closed");
+});
+
+//hubConnection.start().then(() => {
+//    console.log("SignalR connected successfully");
+//}).catch(err => {
+//    console.error("Error connecting to SignalR:", err);
+//});
 
 let playerName = "";
 let gridSize = 6; // Default grid size
@@ -55,20 +70,24 @@ function saveGameStateToServer() {
         data: JSON.stringify(payload),
         success: function () {
             console.log("Game state saved successfully");
-            hubConnection.invoke("NotifyMove", `${playerName} has made a move.`);
+            //hubConnection.invoke("NotifyMove", `${playerName} has made a move.`);
+            hubConnection.invoke("NotifyMove", "Test move notification").catch(err => console.error(err));
+
         },
         error: function (err) {
             console.error("Failed to save game state:", err);
         }
     });
 }
-// Handle joining the game
-document.getElementById("join-game").addEventListener("click", () => {
-    playerName = prompt("Enter your name:");
-    if (playerName) {
-        hubConnection.invoke("JoinGame", playerName);
-    }
+
+
+
+// Player joined notification
+hubConnection.on("PlayerJoined", (name) => {
+    document.getElementById("status").innerText = `${name} joined the game!`;
+    if (!isPlayerTurn) isPlayerTurn = true;
 });
+
 
 // Make a move
 function makeMove(cell) {
@@ -115,15 +134,18 @@ hubConnection.on("MoveNotification", (message) => {
     //document.getElementById("status").innerText = message;
     window.location = window.location.href;
 });
+// Handle joining the game
+const joinGameButton = document.getElementById("join-game");
+if (joinGameButton) {
+    joinGameButton.addEventListener("click", () => {
+        const playerName = prompt("Enter your name:");
+        if (playerName) {
+            hubConnection.invoke("JoinGame", playerName)
+                .catch(err => console.error("Error invoking JoinGame:", err));
+        }
+    });
+} else {
+    console.warn("join-game element not found");
+}
 
-// Player joined notification
-hubConnection.on("PlayerJoined", (name) => {
-    document.getElementById("status").innerText = `${name} joined the game!`;
-    if (!isPlayerTurn) isPlayerTurn = true;
-});
 
-// Start connection and initialize grid
-hubConnection.start().then(() => {
-    initializeGrid();
-    console.log("Connection established.");
-}).catch(err => console.error(err));
