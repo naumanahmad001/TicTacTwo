@@ -163,6 +163,10 @@
 
             const nextPlayer = (currentPlayer + 1) % 2; // Switch player
             saveGameStateToServer(positions, nextPlayer);
+            checkWin();
+            currentPlayer = nextPlayer; // Update locally
+            isMyTurn = false;
+            updateGridStatus(); // Disable grid for this player
         }
 
         // Handle cell clicks
