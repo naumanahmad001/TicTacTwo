@@ -9,6 +9,25 @@
         pointer-events: none;
         opacity: 0.5;
     }
+
+    .highlight {
+        background-color: #c8e6c9; /* Light green for valid drop cells */
+    }
+
+    .cell.taken {
+        cursor: grab;
+    }
+
+        .cell.taken.active {
+            cursor: grab;
+        }
+
+    button:disabled {
+        cursor: not-allowed;
+        opacity: 0.65;
+    }
+
+
 </style>
 <script src="~/lib/jquery/dist/jquery.min.js"></script>
 <div class="container d-flex flex-column justify-content-center align-items-center text-center">
@@ -97,7 +116,7 @@
         // Generate the grid dynamically
         for (let i = 0; i < boardSize; i++) {
             for (let j = 0; j < boardSize; j++) {
-                const $cell = $('<div class="cell" data-row="' + i + '" data-col="' + j + '"></div>');
+                const $cell = $('<div class="cell" draggable="true" data-row="' + i + '" data-col="' + j + '"></div>');
                 $grid.append($cell);
             }
         }
@@ -112,9 +131,23 @@
             }
         }
         function updateGridStatus() {
+            // Update grid status
             $grid.toggleClass('disabled', !isMyTurn);
-            $('#is-your-turn').text(isMyTurn == true ? 'True' : 'False'); // Update turn status
+
+            // Update turn status text
+            $('#is-your-turn').text(isMyTurn ? 'True' : 'False');
+
+            // Disable or enable buttons
+            $(".controls button").prop("disabled", !isMyTurn);
+
+            // Optionally, add a visual indicator for disabled buttons
+            if (!isMyTurn) {
+                $(".controls button").addClass("btn-secondary").removeClass("btn-primary");
+            } else {
+                $(".controls button").addClass("btn-primary").removeClass("btn-secondary");
+            }
         }
+
 
 
         // Place saved pieces if the game is loaded
@@ -134,6 +167,114 @@
         highlightMatrix();
         checkWin();
         $('#waiting-overlay').hide();
+
+        // Initialize drag-and-drop functionality
+        function enableDragAndDrop() {
+            $(".cell.taken").each(function () {
+                if ($(this).text() === myPiece) {
+                    $(this).attr("draggable", true);
+                    $(this).css("cursor", "grab"); // Explicitly set grab cursor for movable cells
+                } else {
+                    $(this).attr("draggable", false);
+                    $(this).css("cursor", "not-allowed"); // Prevent grab cursor for non-movable cells
+                }
+            });
+
+            // Enable dragging on taken cells
+            $(".cell.taken").on("dragstart", function (e) {
+                if ($(this).text() !== myPiece) {
+                    e.preventDefault(); // Prevent dragging if the piece is not `myPiece`
+                    return;
+                }
+                const $cell = $(this);
+                const row = $cell.data("row");
+                const col = $cell.data("col");
+                e.originalEvent.dataTransfer.setData("text/plain", JSON.stringify({ row, col }));
+                highlightValidDropCells(row, col);
+            });
+
+
+            $(".cell").on("dragover", function (e) {
+                e.preventDefault(); // Allow dropping
+            });
+
+            $(".cell").on("drop", function (e) {
+                e.preventDefault();
+                const $cell = $(this);
+
+                // Get the original position of the piece being dragged
+                const data = JSON.parse(e.originalEvent.dataTransfer.getData("text/plain"));
+                const originalRow = data.row;
+                const originalCol = data.col;
+
+                // Get the new position where the piece is dropped
+                const newRow = $cell.data("row");
+                const newCol = $cell.data("col");
+
+                // Check if the drop is valid
+                if (isValidDrop(originalRow, originalCol, newRow, newCol)) {
+                    // Move the piece
+                    const piece = $(`[data-row="${originalRow}"][data-col="${originalCol}"]`).text();
+                    $(`[data-row="${originalRow}"][data-col="${originalCol}"]`).text("").removeClass("taken");
+                    $cell.text(piece).addClass("taken");
+
+                    // Save game state to server
+                    saveGameStateToServer(getGameState(), (currentPlayer + 1) % 2);
+                    checkWin(); // Check for a win condition
+                    currentPlayer = (currentPlayer + 1) % 2; // Switch turn
+                    isMyTurn = false;
+                    updateGridStatus(); // Update the grid status
+                }
+
+                clearHighlights(); // Remove drop highlights
+            });
+        }
+
+        // Highlight valid cells for dropping
+        function highlightValidDropCells(originalRow, originalCol) {
+            $(".cell").removeClass("highlight");
+            for (let i = 0; i < boardSize; i++) {
+                for (let j = 0; j < boardSize; j++) {
+                    if (isValidDrop(originalRow, originalCol, i, j)) {
+                        $(`[data-row="${i}"][data-col="${j}"]`).addClass("highlight");
+                    }
+                }
+            }
+        }
+
+        // Clear highlights
+        function clearHighlights() {
+            $(".cell").removeClass("highlight");
+        }
+
+        function isValidDrop(originalRow, originalCol, newRow, newCol) {
+            const originalCell = $(`[data-row="${originalRow}"][data-col="${originalCol}"]`);
+
+            return (
+                originalCell.text() === myPiece && // Ensure the piece being dragged belongs to the current player
+                newRow >= matrixStartRow &&
+                newRow < matrixStartRow + gridSize &&
+                newCol >= matrixStartCol &&
+                newCol < matrixStartCol + gridSize &&
+                !$(`[data-row="${newRow}"][data-col="${newCol}"]`).hasClass("taken") // Ensure the target cell is not taken
+            );
+        }
+
+
+        // Get the current game state
+        function getGameState() {
+            const positions = {};
+            $(".cell.taken").each(function () {
+                const row = $(this).data("row");
+                const col = $(this).data("col");
+                const text = $(this).text();
+                positions[`${row},${col}`] = text;
+            });
+            return positions;
+        }
+
+        // Enable drag-and-drop on page load
+        enableDragAndDrop();
         // Validate if move is valid
         function isValidMove(rowOffset, colOffset) {
             const newRowStart = matrixStartRow + rowOffset;

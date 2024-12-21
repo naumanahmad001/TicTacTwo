@@ -47,7 +47,7 @@ body {
 }
 
 .cell.taken {
-    pointer-events: none;
+    /*pointer-events: none;*/
     background-color: #f0f0f0;
 }
 
