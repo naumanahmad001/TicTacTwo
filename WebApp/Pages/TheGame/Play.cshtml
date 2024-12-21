@@ -37,6 +37,7 @@
     <!-- Grid Section -->
     <div> You are playing as: @Model.MyPiece</div>
     <div id="turn-status" class="mb-2">Is it your turn? <span id="is-your-turn">False</span></div>
+    <div id="remaining-pieces" style="margin-top: 10px; font-weight: bold;">Pieces left: 0</div>
 
 
     <div id="grid" class="grid mb-4"></div>
@@ -46,23 +47,23 @@
         <div class="row justify-content-center">
             <!-- Move Up Button -->
             <div class="col-12 mb-2">
-                <button id="move-up" class="btn btn-primary btn-lg">
+                <button id="move-up" class="btn btn-primary btn-sm">
                     <i class="fas fa-arrow-up"></i>
                 </button>
             </div>
             <!-- Left, Reset, Right Buttons -->
             <div class="col-12 d-flex justify-content-center">
-                <button id="move-left" class="btn btn-primary btn-lg me-2">
+                <button id="move-left" class="btn btn-primary btn-sm me-2">
                     <i class="fas fa-arrow-left"></i>
                 </button>
                
-                <button id="move-right" class="btn btn-primary btn-lg ms-2">
+                <button id="move-right" class="btn btn-primary btn-sm ms-2">
                     <i class="fas fa-arrow-right"></i>
                 </button>
             </div>
             <!-- Move Down Button -->
             <div class="col-12 mt-2">
-                <button id="move-down" class="btn btn-primary btn-lg">
+                <button id="move-down" class="btn btn-primary btn-sm">
                     <i class="fas fa-arrow-down"></i>
                 </button>
             </div>
@@ -103,9 +104,10 @@
         const myPiece = '@Model.MyPiece.ToString()';
         matrixStartRow = @Model.MatrixStartRow;
         matrixStartCol = @Model.MatrixStartColumn;
+        const piecesAmount = @Model.PiecesAmount;
         let currentPlayer = 0;                   // Start with player 1
         let isMyTurn = true;
-       
+        let placedPiecesCount = 0; // Track the number of placed pieces
         // Initialize the grid
         const $grid = $('#grid');
         $grid.css({
@@ -121,6 +123,14 @@
             }
         }
 
+        // Track placed pieces and validate limit
+        function validatePiecePlacement() {
+            if (placedPiecesCount >= piecesAmount) {
+                alert("Piece Limit reached.");
+                return false;
+            }
+            return true;
+        }
         // Highlight active matrix
         function highlightMatrix() {
             $('.cell').removeClass('active');
@@ -149,7 +159,11 @@
         }
 
 
-
+        // Display remaining pieces
+        function updateRemainingPieces() {
+            const remainingPieces = piecesAmount - placedPiecesCount;
+            $('#remaining-pieces').text(`Pieces left: ${remainingPieces}`);
+        }
         // Place saved pieces if the game is loaded
         //if (!isNewGame) 
         {
@@ -157,7 +171,9 @@
             Object.keys(savedPieces).forEach(key => {
                 const [row, col] = key.split(',').map(Number); // Parse the string key back into row, col
                 const symbol = savedPieces[key];
-
+                if(symbol === myPiece){
+                    placedPiecesCount++;
+                }
                 // Find the corresponding cell and set the symbol
                 const $cell = $(`[data-row='${row}'][data-col='${col}']`);
                 $cell.text(symbol).addClass('taken');
@@ -165,6 +181,7 @@
         }
         updateGridStatus();
         highlightMatrix();
+        updateRemainingPieces();
         checkWin();
         $('#waiting-overlay').hide();
 
@@ -316,8 +333,11 @@
 
             const $cell = $(this);
             if ($cell.hasClass('active') && !$cell.hasClass('taken')) {
-                $cell.text(myPiece).addClass('taken');
+                if (!validatePiecePlacement()) return; // Validate piece count
 
+                $cell.text(myPiece).addClass('taken');
+                placedPiecesCount++; // Increment placed piece count
+                updateRemainingPieces(); // Update remaining pieces display
                 // Save move and notify server
                 const positions = {};
                 $('.cell.taken').each(function () {
@@ -401,6 +421,8 @@
             // If there's a win, announce it and reset
             if (win) {
                 showWinningModal(currentPlayer, symbol);
+                isMyTurn = false;
+                updateGridStatus();
                 $('#reset-game').trigger('click');
             }
             else
@@ -441,6 +463,8 @@
                 // If there's a win, announce it and reset
                 if (win) {
                     showWinningModal(currentPlayer, symbol);
+                    isMyTurn = false;
+                    updateGridStatus();
                     $('#reset-game').trigger('click');
                 }
             }

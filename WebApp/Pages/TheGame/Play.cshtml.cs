@@ -22,6 +22,7 @@ namespace WebApp.Pages.TheGame
         public string MyPiece { get; set; }
         public int MatrixStartRow { get; set; }
         public int MatrixStartColumn { get; set; }
+        public int PiecesAmount { get; set; }
         public Dictionary<string, char> SavedPieces { get; set; } = new Dictionary<string, char>();
 
         public IActionResult OnGet(string? gameName, int? configId, string? gameId, string? myPiece)
@@ -31,7 +32,7 @@ namespace WebApp.Pages.TheGame
                 // Load game by gameId
                 var game = gameLoader.LoadGame(gameId);
                 //IsNewGame = false;
-
+                
                 if (game.pieces != null)
                 {
                        SavedPieces = game.pieces.ToDictionary(
@@ -42,6 +43,7 @@ namespace WebApp.Pages.TheGame
                 GameConfig = _context.Configurations.FirstOrDefault(c => c.ConfigName == game.config.ConfigName);
                 GameName = gameId;
                 MyPiece = myPiece;
+                PiecesAmount = GameConfig.PiecesAmount;
 
                 if (game.grid == null)
                 {
