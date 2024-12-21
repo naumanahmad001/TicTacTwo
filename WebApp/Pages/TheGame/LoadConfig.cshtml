@@ -32,6 +32,18 @@
                 <span asp-validation-for="GameName" class="text-danger"></span>
             </div>
 
+            <div class="form-group">
+                <label for="firstPlayerPassword">First Player Password</label>
+                <input id="firstPlayerPassword" asp-for="FirstPlayerPassword" class="form-control" />
+                <span asp-validation-for="FirstPlayerPassword" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label for="secondPlayerPassword">Second Player Password</label>
+                <input id="secondPlayerPassword" asp-for="SecondPlayerPassword" class="form-control" />
+                <span asp-validation-for="SecondPlayerPassword" class="text-danger"></span>
+            </div>
+
             <button type="submit" class="btn btn-primary mt-2">Start Game</button>
     </form>
 </div>

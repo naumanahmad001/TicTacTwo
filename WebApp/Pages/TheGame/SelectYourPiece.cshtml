@@ -6,6 +6,13 @@
 
 <div class="container mt-5">
     <h1 class="text-center">Select Your Piece</h1>
+
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="alert alert-danger text-center">
+            @Model.ErrorMessage
+        </div>
+    }
     <form method="post" class="mt-4">
         <input type="hidden" asp-for="GameName" />
         <div class="mb-3">

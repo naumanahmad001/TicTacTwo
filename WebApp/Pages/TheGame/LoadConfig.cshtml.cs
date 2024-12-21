@@ -19,6 +19,12 @@ namespace WebApp.Pages.TheGame
         [BindProperty]
         [Required(ErrorMessage = "Game Name is required.")]
         public string GameName { get; set; }
+        [BindProperty]
+        [Required(ErrorMessage = "First player password is required.")]
+        public string FirstPlayerPassword { get; set; }
+        [BindProperty]
+        [Required(ErrorMessage = "Second player password is required.")]
+        public string SecondPlayerPassword { get; set; }
         public void OnGet()
         {
             Configurations = _context.Configurations.ToList(); 
@@ -32,7 +38,7 @@ namespace WebApp.Pages.TheGame
                 return Page();
             }
             IFileSaveLoad fileSaveLoad = FileSaveLoadFactory.GetFileSaveLoadImplementation();
-            fileSaveLoad.SaveInitialGame(GameName, selectedConfig);
+            fileSaveLoad.SaveInitialGame(GameName, selectedConfig, FirstPlayerPassword, SecondPlayerPassword);
             return RedirectToPage("/TheGame/SelectYourPiece", new { gameId = GameName });
         }
     }

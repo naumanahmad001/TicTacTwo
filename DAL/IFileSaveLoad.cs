@@ -15,7 +15,7 @@ public interface IFileSaveLoad
 
     List<string> DisplayAllGames();
 
-    void SaveInitialGame(string saveName, int configId);
+    void SaveInitialGame(string saveName, int configId, string firstPlayerPassword, string secondPlayerPassword);
     
     (CustomConfig config, Dictionary<(int, int), char> pieces, Grid grid) LoadGame(string saveName);
 

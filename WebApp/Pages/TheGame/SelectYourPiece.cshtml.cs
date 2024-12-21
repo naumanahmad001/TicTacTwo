@@ -28,33 +28,62 @@ namespace WebApp.Pages.TheGame
 
         [BindProperty]
         public string GameName { get; set; }
+        
+        public string ErrorMessage { get; set; }
 
+      
+        public string FirstPlayerPassword { get; set; }
+       
+        public string SecondPlayerPassword { get; set; }
+
+       
         public List<string> ConfigPieces { get; set; }
-
+       
+        public Config GameConfig { get; set; }
         public void OnGet(string gameId)
         {
-            GameName = gameId; // Set GameName from query string
-            var game = gameLoader.LoadGame(gameId);
-            Config GameConfig = _context.Configurations.FirstOrDefault(c => c.ConfigName == game.config.ConfigName);
-            if (GameConfig != null)
-            {
-                ConfigPieces = new List<string>();
-                ConfigPieces.Add(GameConfig.PlayerOnePiece);
-                ConfigPieces.Add(GameConfig.PlayerTwoPiece);
-            }
+            LoadGameData(gameId);
         }
 
         public IActionResult OnPost()
         {
+            LoadGameData(GameName);
             if (!ModelState.IsValid)
             {
-                // If validation fails, return to the page with the current model state
                 return Page();
             }
-
-           
+            if (SelectedPiece == GameConfig.PlayerOnePiece && PiecePassword == FirstPlayerPassword)
+            {
+                return RedirectToPage("/TheGame/Play", new { gameId = GameName, myPiece = SelectedPiece });  
+            }
+            else if (SelectedPiece == GameConfig.PlayerTwoPiece && PiecePassword == SecondPlayerPassword) 
+            {
+                return RedirectToPage("/TheGame/Play", new { gameId = GameName, myPiece = SelectedPiece });
+            }
+            else {
+                ErrorMessage = "Invalid piece or password. Please try again.";
+                return Page();
+            }
             
-            return RedirectToPage("/TheGame/Play", new { gameId = GameName, myPiece = SelectedPiece });
+           
         }
+        private void LoadGameData(string gameId)
+        {
+            GameName = gameId; // Set GameName from query string
+            var game = gameLoader.LoadGame(gameId);
+            var savedGame = _context.SavedGames.FirstOrDefault(g => g.GameName == gameId);
+            GameConfig = _context.Configurations.FirstOrDefault(c => c.ConfigName == game.config.ConfigName);
+            if (GameConfig != null)
+            {
+                ConfigPieces = new List<string>
+        {
+            GameConfig.PlayerOnePiece,
+            GameConfig.PlayerTwoPiece
+        };
+                FirstPlayerPassword = savedGame.FirstPlayerPassword;
+                SecondPlayerPassword = savedGame.SecondPlayerPassword;
+            }
+        }
+
     }
 }

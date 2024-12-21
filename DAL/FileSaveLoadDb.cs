@@ -157,8 +157,8 @@ namespace DAL
                     //existingGame.ConfigId = config.Id;
                     existingGame.PositionsJson = JsonConvert.SerializeObject(pieces); // Updating PositionsJson
                     existingGame.GridTopLeft = gridTopLeft; // Updating GridTopLeft
-                    existingGame.FirstPlayerPassword = firstPlayerPassword; // Updating password for the first player
-                    existingGame.SecondPlayerPassword = secondPlayerPassword; // Updating password for the second player
+                    //existingGame.FirstPlayerPassword = firstPlayerPassword; // Updating password for the first player
+                    //existingGame.SecondPlayerPassword = secondPlayerPassword; // Updating password for the second player
                 }
 
 
@@ -296,7 +296,7 @@ namespace DAL
         
         
 
-        public void SaveInitialGame(string saveName, int configId)
+        public void SaveInitialGame(string saveName, int configId, string firstPlayerPassword, string secondPlayerPassword)
         {
 
             var newGame = new Game
@@ -305,8 +305,8 @@ namespace DAL
                 ConfigId = configId,
                 PositionsJson = null,
                 GridTopLeft = null,
-                FirstPlayerPassword = null,
-                SecondPlayerPassword = null
+                FirstPlayerPassword = firstPlayerPassword,
+                SecondPlayerPassword = secondPlayerPassword
             };
 
             _dbContext.SavedGames.Add(newGame);
