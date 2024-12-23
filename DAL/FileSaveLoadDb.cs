@@ -341,7 +341,7 @@ namespace DAL
                 GridTopLeft = $"{grid.TopLeft.Item1},{grid.TopLeft.Item2}",
                 Positions = positionsStringKeys,
                 MoveNumber = moveNumber,
-                GameId = game.Id
+                GameId = game.GameName
             };
 
 
@@ -351,12 +351,14 @@ namespace DAL
         
         
         
-        public void DeleteAllTempGameStates()
+        public void DeleteAllTempGameStates(string GameName)
         {
-            var tempStates = _dbContext.TempStates.ToList();
+            var tempStates = _dbContext.TempStates.Where(a=>a.GameId == GameName).ToList();
             _dbContext.TempStates.RemoveRange(tempStates);
             _dbContext.SaveChanges();
         }
+
+
     }
     
 }

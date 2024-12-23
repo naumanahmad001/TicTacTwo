@@ -25,36 +25,50 @@ namespace WebApp.Pages.TheGame
         public int PiecesAmount { get; set; }
         public Dictionary<string, char> SavedPieces { get; set; } = new Dictionary<string, char>();
 
-        public IActionResult OnGet(string? gameName, int? configId, string? gameId, string? myPiece)
+        public IActionResult OnGet(string? gameName, int? configId, string? gameId, string? myPiece, string? reload)
         {
             if (!string.IsNullOrEmpty(gameId))
             {
                 // Load game by gameId
                 var game = gameLoader.LoadGame(gameId);
                 //IsNewGame = false;
-                
-                if (game.pieces != null)
+                if (reload != null)
                 {
-                       SavedPieces = game.pieces.ToDictionary(
-                       kvp => $"{kvp.Key.Item1},{kvp.Key.Item2}", // Convert tuple keys to "row,col" strings
-                       kvp => kvp.Value
-                   );
+                    var tempGame = _context.TempStates.Where(a => a.GameId == gameId).FirstOrDefault();
+                    if (tempGame.Positions != null)
+                    {
+                        SavedPieces = tempGame.Positions;
+                    }
+                }
+                else
+                {
+                    if (game.pieces != null)
+                    {
+                        SavedPieces = game.pieces.ToDictionary(
+                        kvp => $"{kvp.Key.Item1},{kvp.Key.Item2}", // Convert tuple keys to "row,col" strings
+                        kvp => kvp.Value
+                    );
+                    }
                 }
                 GameConfig = _context.Configurations.FirstOrDefault(c => c.ConfigName == game.config.ConfigName);
                 GameName = gameId;
                 MyPiece = myPiece;
                 PiecesAmount = GameConfig.PiecesAmount;
 
-                if (game.grid == null)
-                {
-                    MatrixStartRow = 0;
-                    MatrixStartColumn = 0;
+                if (reload == null) {
+
+                    if (game.grid == null)
+                    {
+                        MatrixStartRow = 0;
+                        MatrixStartColumn = 0;
+                    }
+                    else
+                    {
+                        MatrixStartRow = game.grid.TopLeft.Item1;
+                        MatrixStartColumn = game.grid.TopLeft.Item2;
+                    }
                 }
-                else 
-                {
-                    MatrixStartRow = game.grid.TopLeft.Item1;
-                    MatrixStartColumn = game.grid.TopLeft.Item2;
-                }
+               
                 
             }
             //else if (!string.IsNullOrEmpty(gameName) && configId.HasValue)
@@ -83,6 +97,7 @@ namespace WebApp.Pages.TheGame
             public string GameSaveName { get; set; } = default!;
             public Dictionary<string, string> Positions { get; set; } = new Dictionary<string, string>();
             public GridDto Grid { get; set; } = default!;
+            public bool? SkipDeleteTempStates { get; set; }
         }
 
         public class GridDto

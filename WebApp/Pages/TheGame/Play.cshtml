@@ -33,13 +33,19 @@
 <div class="container d-flex flex-column justify-content-center align-items-center text-center">
     <!-- Title -->
     <h1 class="mb-4">Tic Tac Two - @Model.GameName</h1>
+    <div id="alert-container" style="position: fixed; top: 20px; right: 20px; z-index: 1055;"></div>
+
     <input type="hidden" id="gameName" value="@Model.GameName" />
     <!-- Grid Section -->
     <div> You are playing as: @Model.MyPiece</div>
     <div id="turn-status" class="mb-2">Is it your turn? <span id="is-your-turn">False</span></div>
     <div id="remaining-pieces" style="margin-top: 10px; font-weight: bold;">Pieces left: 0</div>
 
-
+    <div class="mb-2">
+        <button id="btn-save" class="btn btn-success" onclick="saveGameStateToServerFinal()">
+            Save Game
+        </button>
+    </div>
     <div id="grid" class="grid mb-4"></div>
 
     <!-- Controls Section -->
@@ -126,7 +132,7 @@
         // Track placed pieces and validate limit
         function validatePiecePlacement() {
             if (placedPiecesCount >= piecesAmount) {
-                alert("Piece Limit reached.");
+                showAlert('Piece limit reached. You cannot place more pieces!', 'warning');
                 return false;
             }
             return true;
@@ -149,7 +155,7 @@
 
             // Disable or enable buttons
             $(".controls button").prop("disabled", !isMyTurn);
-
+            $("#btn-save").prop("disabled", !isMyTurn);
             // Optionally, add a visual indicator for disabled buttons
             if (!isMyTurn) {
                 $(".controls button").addClass("btn-secondary").removeClass("btn-primary");
@@ -423,6 +429,7 @@
                 showWinningModal(currentPlayer, symbol);
                 isMyTurn = false;
                 updateGridStatus();
+                saveGameStateToServerOnWin();
                 $('#reset-game').trigger('click');
             }
             else
@@ -465,6 +472,7 @@
                     showWinningModal(currentPlayer, symbol);
                     isMyTurn = false;
                     updateGridStatus();
+                    saveGameStateToServerOnWin();
                     $('#reset-game').trigger('click');
                 }
             }

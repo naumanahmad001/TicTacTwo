@@ -81,8 +81,100 @@ function saveGameStateToServer() {
     });
 }
 
+function saveGameStateToServerFinal() {
+    const positions = {};
+    $('.cell').each(function () {
+        const row = $(this).data('row');
+        const col = $(this).data('col');
+        const text = $(this).text();
 
+        if (text) {
+            positions[`${row},${col}`] = text;
+        }
+    });
 
+    const payload = {
+        gameSaveName: document.getElementById("gameName").value,
+        positions: positions,
+        grid: {
+            topLeft: `${matrixStartRow},${matrixStartCol}`
+        },
+        skipDeleteTempStates: false
+    };
+
+    $.ajax({
+        url: '/api/Game/SaveGameState',
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(payload),
+        success: function () {
+            console.log("Game state saved successfully");
+            showAlert('Game state saved successfully!', 'success');
+            //hubConnection.invoke("NotifyReloadSavedGame", window.location.href).catch(err => console.error(err));
+        },
+        error: function (err) {
+            console.error("Failed to save game state:", err);
+        }
+    });
+}
+
+function saveGameStateToServerOnWin() {
+    const positions = {};
+    $('.cell').each(function () {
+        const row = $(this).data('row');
+        const col = $(this).data('col');
+        const text = $(this).text();
+
+        if (text) {
+            positions[`${row},${col}`] = text;
+        }
+    });
+
+    const payload = {
+        gameSaveName: document.getElementById("gameName").value,
+        positions: positions,
+        grid: {
+            topLeft: `${matrixStartRow},${matrixStartCol}`
+        },
+        skipDeleteTempStates: true
+    };
+
+    $.ajax({
+        url: '/api/Game/SaveGameState',
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(payload),
+        success: function () {
+            console.log("Game state saved successfully");
+            //showAlert('Game state saved successfully!', 'success');
+        },
+        error: function (err) {
+            console.error("Failed to save game state:", err);
+        }
+    });
+}
+
+function showAlert(message, type) {
+    // Create the alert HTML
+    const alertHtml = `
+        <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    `;
+
+    // Append the alert to the body or a specific container
+    const alertContainer = document.getElementById('alert-container') || document.body;
+    const alertElement = document.createElement('div');
+    alertElement.innerHTML = alertHtml;
+    alertContainer.appendChild(alertElement);
+
+    // Automatically remove the alert after 5 seconds
+    setTimeout(() => {
+        alertElement.querySelector('.alert').classList.remove('show');
+        setTimeout(() => alertContainer.removeChild(alertElement), 150); // Wait for fade-out animation
+    }, 5000);
+}
 // Player joined notification
 hubConnection.on("PlayerJoined", (name) => {
     document.getElementById("status").innerText = `${name} joined the game!`;
@@ -130,10 +222,35 @@ hubConnection.on("ReceiveState", (gameState) => {
     document.getElementById("turn-notification").innerText = "It's your turn!";
 });
 
+
+function updateQueryStringParameter(uri, key, value) {
+    const re = new RegExp("([?&])" + key + "=.*?(&|$)", "i");
+    const separator = uri.indexOf('?') !== -1 ? "&" : "?";
+    if (uri.match(re)) {
+        return uri.replace(re, '$1' + key + "=" + value + '$2');
+    } else {
+        return uri + separator + key + "=" + value;
+    }
+}
+
+function removeQueryStringParameter(uri, key) {
+    // Use a regular expression to find the key and its value in the query string
+    const re = new RegExp("([?&])" + key + "=[^&]*(&?)", "i");
+    uri = uri.replace(re, (match, p1, p2) => p1 === '?' && p2 ? '?' : p1); // Handle edge cases for '?' and '&'
+    // Remove trailing '?' or '&' if present
+    return uri.replace(/[?&]$/, '');
+}
+
 // Notification for moves
 hubConnection.on("MoveNotification", (message) => {
-    //document.getElementById("status").innerText = message;
-    window.location = window.location.href;
+    const updatedUrl = updateQueryStringParameter(window.location.href, 'reload', 1);
+    window.location = updatedUrl;
+
+});
+
+// Notification Reload Saved Game
+hubConnection.on("ReloadSavedGame", (url) => {
+    window.location = removeQueryStringParameter(url, "reload");;
 });
 // Handle joining the game
 const joinGameButton = document.getElementById("join-game");

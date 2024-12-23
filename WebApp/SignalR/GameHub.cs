@@ -19,5 +19,10 @@ namespace WebApp.SignalR
         {
             await Clients.Others.SendAsync("MoveNotification", message);
         }
+        public async Task NotifyReloadSavedGame(string message)
+        {
+            await Clients.Others.SendAsync("ReloadSavedGame", message);
+        }
+        
     }
 }

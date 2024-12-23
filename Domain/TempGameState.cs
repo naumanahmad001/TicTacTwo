@@ -18,6 +18,6 @@ namespace Domain
         
         public int MoveNumber { get; set; }
         
-        public int GameId { get; set; }
+        public string GameId { get; set; }
     }
 }

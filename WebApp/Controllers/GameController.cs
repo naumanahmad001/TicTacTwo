@@ -33,9 +33,46 @@ namespace WebApp.Controllers
                 );
 
                 IFileSaveLoad fileSaveLoad = FileSaveLoadFactory.GetFileSaveLoadImplementation();
-               
+                fileSaveLoad.DeleteAllTempGameStates(request.GameSaveName);
                 fileSaveLoad.SaveTempGameState(positions, grid, request.GameSaveName);
                 
+                //string saveResult = fileSaveLoad.SaveGameState(new CustomConfig(), positions, grid, request.GameSaveName, string.Empty);
+                return Json(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpPost("SaveGameState")]
+        public IActionResult SaveGameState([FromBody] SaveTempGameRequest request)
+        {
+            try
+            {
+                // Parse top-left grid coordinates
+                var gridTopLeftParts = request.Grid.TopLeft.Split(',');
+                var grid = new Grid
+                {
+                    TopLeft = (int.Parse(gridTopLeftParts[0]), int.Parse(gridTopLeftParts[1]))
+                };
+
+                // Convert positions to Dictionary<(int, int), char>
+                var positions = request.Positions.ToDictionary(
+                    kvp =>
+                    {
+                        var coords = kvp.Key.Split(',');
+                        return (int.Parse(coords[0]), int.Parse(coords[1]));
+                    },
+                    kvp => kvp.Value[0] // Convert string to char
+                );
+
+                IFileSaveLoad fileSaveLoad = FileSaveLoadFactory.GetFileSaveLoadImplementation();
+                if (request.SkipDeleteTempStates != null && request.SkipDeleteTempStates == true) { }
+                else
+                {
+                    fileSaveLoad.DeleteAllTempGameStates(request.GameSaveName);
+                }
                 string saveResult = fileSaveLoad.SaveGameState(new CustomConfig(), positions, grid, request.GameSaveName, string.Empty);
                 return Json(new { success = true });
             }

@@ -19,6 +19,6 @@ public interface IFileSaveLoad
     
     (CustomConfig config, Dictionary<(int, int), char> pieces, Grid grid) LoadGame(string saveName);
 
-    void DeleteAllTempGameStates();
+    void DeleteAllTempGameStates(string GameName);
 
 }

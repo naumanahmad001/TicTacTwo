@@ -300,7 +300,7 @@ private static void InitializeLoadedGame(Dictionary<(int, int), char> loadedPiec
         private static void CleanupTempStates()
         {
             IFileSaveLoad fileSaveLoad = FileSaveLoadFactory.GetFileSaveLoadImplementation();
-            fileSaveLoad.DeleteAllTempGameStates();
+            fileSaveLoad.DeleteAllTempGameStates("");
         }
     }
 }
