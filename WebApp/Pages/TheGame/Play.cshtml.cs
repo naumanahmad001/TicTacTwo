@@ -18,6 +18,7 @@ namespace WebApp.Pages.TheGame
         }
         public Config GameConfig { get; set; } = default!;
         public string GameName { get; set; }
+        public int GameId { get; set; }
         public bool IsNewGame { get; set; }
         public string MyPiece { get; set; }
         public int MatrixStartRow { get; set; }
@@ -25,20 +26,24 @@ namespace WebApp.Pages.TheGame
         public int PiecesAmount { get; set; }
         public Dictionary<string, char> SavedPieces { get; set; } = new Dictionary<string, char>();
 
-        public IActionResult OnGet(string? gameName, int? configId, string? gameId, string? myPiece, string? reload)
+        public IActionResult OnGet(int? configId, int? gameId, string? myPiece, string? reload)
         {
-            if (!string.IsNullOrEmpty(gameId))
+            if (gameId != null)
             {
+                GameId = gameId.Value;
                 // Load game by gameId
-                var game = gameLoader.LoadGame(gameId);
+                //Game savedGame = _context.SavedGames.Where(a=>a.Id == gameId).FirstOrDefault(); 
+                var game = gameLoader.LoadGame(gameId.Value);
+                string GridTopLeft = string.Empty;
                 //IsNewGame = false;
                 if (reload != null)
                 {
-                    var tempGame = _context.TempStates.Where(a => a.GameId == gameId).FirstOrDefault();
+                    var tempGame = _context.TempStates.Where(a => a.GameId == gameId.Value.ToString()).FirstOrDefault();
                     if (tempGame.Positions != null)
                     {
                         SavedPieces = tempGame.Positions;
                     }
+                    GridTopLeft = tempGame.GridTopLeft;
                 }
                 else
                 {
@@ -51,11 +56,12 @@ namespace WebApp.Pages.TheGame
                     }
                 }
                 GameConfig = _context.Configurations.FirstOrDefault(c => c.ConfigName == game.config.ConfigName);
-                GameName = gameId;
+                //GameName = savedGame.GameName;
                 MyPiece = myPiece;
                 PiecesAmount = GameConfig.PiecesAmount;
 
-                if (reload == null) {
+                if (reload == null)
+                {
 
                     if (game.grid == null)
                     {
@@ -68,21 +74,14 @@ namespace WebApp.Pages.TheGame
                         MatrixStartColumn = game.grid.TopLeft.Item2;
                     }
                 }
+                else {
+                    string[] GridTopLeftPoints = GridTopLeft.Split(",");
+                    MatrixStartRow = Convert.ToInt16(GridTopLeftPoints[0].Trim());
+                    MatrixStartColumn = Convert.ToInt16(GridTopLeftPoints[1].Trim());
+                }
                
                 
             }
-            //else if (!string.IsNullOrEmpty(gameName) && configId.HasValue)
-            //{
-            //    IsNewGame = true;
-            //    // Load game configuration by configId
-            //    GameConfig = _context.Configurations.FirstOrDefault(a => a.Id == configId.Value);
-            //    if (GameConfig == null)
-            //    {
-            //        return NotFound("Configuration not found.");
-            //    }
-
-            //    GameName = gameName;
-            //}
             else
             {
                 return BadRequest("Invalid request parameters.");
@@ -94,7 +93,7 @@ namespace WebApp.Pages.TheGame
 
         public class SaveTempGameRequest
         {
-            public string GameSaveName { get; set; } = default!;
+            public int GameId { get; set; }
             public Dictionary<string, string> Positions { get; set; } = new Dictionary<string, string>();
             public GridDto Grid { get; set; } = default!;
             public bool? SkipDeleteTempStates { get; set; }

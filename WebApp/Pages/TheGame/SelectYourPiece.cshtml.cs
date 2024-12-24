@@ -26,9 +26,12 @@ namespace WebApp.Pages.TheGame
         [DataType(DataType.Password)]
         public string PiecePassword { get; set; }
 
-        [BindProperty]
-        public string GameName { get; set; }
         
+        public string GameName { get; set; }
+
+        [BindProperty]
+        public int GameId { get; set; }
+
         public string ErrorMessage { get; set; }
 
       
@@ -40,25 +43,25 @@ namespace WebApp.Pages.TheGame
         public List<string> ConfigPieces { get; set; }
        
         public Config GameConfig { get; set; }
-        public void OnGet(string gameId)
+        public void OnGet(int gameId)
         {
             LoadGameData(gameId);
         }
 
         public IActionResult OnPost()
         {
-            LoadGameData(GameName);
+            LoadGameData(GameId);
             if (!ModelState.IsValid)
             {
                 return Page();
             }
             if (SelectedPiece == GameConfig.PlayerOnePiece && PiecePassword == FirstPlayerPassword)
             {
-                return RedirectToPage("/TheGame/Play", new { gameId = GameName, myPiece = SelectedPiece });  
+                return RedirectToPage("/TheGame/Play", new { gameId = GameId, myPiece = SelectedPiece });  
             }
             else if (SelectedPiece == GameConfig.PlayerTwoPiece && PiecePassword == SecondPlayerPassword) 
             {
-                return RedirectToPage("/TheGame/Play", new { gameId = GameName, myPiece = SelectedPiece });
+                return RedirectToPage("/TheGame/Play", new { gameId = GameId, myPiece = SelectedPiece });
             }
             else {
                 ErrorMessage = "Invalid piece or password. Please try again.";
@@ -67,11 +70,13 @@ namespace WebApp.Pages.TheGame
             
            
         }
-        private void LoadGameData(string gameId)
+        private void LoadGameData(int gameId)
         {
-            GameName = gameId; // Set GameName from query string
+             // Set GameName from query string
             var game = gameLoader.LoadGame(gameId);
-            var savedGame = _context.SavedGames.FirstOrDefault(g => g.GameName == gameId);
+            
+            var savedGame = _context.SavedGames.FirstOrDefault(g => g.Id == gameId);
+            GameName = savedGame.GameName;
             GameConfig = _context.Configurations.FirstOrDefault(c => c.ConfigName == game.config.ConfigName);
             if (GameConfig != null)
             {

@@ -57,7 +57,7 @@ function saveGameStateToServer() {
     });
 
     const payload = {
-        gameSaveName: document.getElementById("gameName").value,
+        gameId: document.getElementById("gameId").value,
         positions: positions,
         grid: {
             topLeft: `${matrixStartRow},${matrixStartCol}`
@@ -94,7 +94,7 @@ function saveGameStateToServerFinal() {
     });
 
     const payload = {
-        gameSaveName: document.getElementById("gameName").value,
+        gameId: document.getElementById("gameId").value,
         positions: positions,
         grid: {
             topLeft: `${matrixStartRow},${matrixStartCol}`
@@ -110,7 +110,8 @@ function saveGameStateToServerFinal() {
         success: function () {
             console.log("Game state saved successfully");
             showAlert('Game state saved successfully!', 'success');
-            //hubConnection.invoke("NotifyReloadSavedGame", window.location.href).catch(err => console.error(err));
+            const updatedUrl = removeQueryStringParameter(window.location.href, 'reload', 1);
+            window.location = updatedUrl;
         },
         error: function (err) {
             console.error("Failed to save game state:", err);
@@ -131,7 +132,7 @@ function saveGameStateToServerOnWin() {
     });
 
     const payload = {
-        gameSaveName: document.getElementById("gameName").value,
+        gameId: document.getElementById("gameId").value,
         positions: positions,
         grid: {
             topLeft: `${matrixStartRow},${matrixStartCol}`

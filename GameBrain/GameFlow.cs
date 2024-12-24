@@ -161,12 +161,12 @@ private static void LoadSavedGame()
         }
         else
         {
-            (CustomConfig loadedConfig, Dictionary<(int, int), char> loadedPieces, Grid loadedGrid) =
-                gameLoader.LoadGame(saveName);
+            //(CustomConfig loadedConfig, Dictionary<(int, int), char> loadedPieces, Grid loadedGrid) =
+            //    gameLoader.LoadGame(saveName); // load game by name is not logical. there can be multiple games of the same name.
 
-            _customConfig = loadedConfig;
-            gameSaveName = saveName;
-            InitializeLoadedGame(loadedPieces, loadedGrid);
+            //_customConfig = loadedConfig;
+            //gameSaveName = saveName;
+            //InitializeLoadedGame(loadedPieces, loadedGrid);
         }
     }
     else
@@ -239,7 +239,7 @@ private static void InitializeLoadedGame(Dictionary<(int, int), char> loadedPiec
                 {
                     currentPlayer = (currentPlayer == playerOnePiece) ? playerTwoPiece : playerOnePiece;
                     IFileSaveLoad fileSaveLoad = FileSaveLoadFactory.GetFileSaveLoadImplementation();
-                    fileSaveLoad.SaveTempGameState(piecePositions, grid, gameSaveName);
+                    //fileSaveLoad.SaveTempGameState(piecePositions, grid, gameSaveName); that is not logical to save game name as reference
                     
                 }
             }
@@ -274,8 +274,8 @@ private static void InitializeLoadedGame(Dictionary<(int, int), char> loadedPiec
                         Console.WriteLine("Are you sure you want to save the game current game state?");
                         
                         IFileSaveLoad fileSaveLoad = FileSaveLoadFactory.GetFileSaveLoadImplementation();
-                        string saveResult = fileSaveLoad.SaveGameState(_customConfig, piecePositions, grid, gameSaveName, _customConfig.ConfigName);
-                        Console.WriteLine(saveResult);
+                        //string saveResult = fileSaveLoad.SaveGameState(_customConfig, piecePositions, grid, gameSaveName, _customConfig.ConfigName);
+                        //Console.WriteLine(saveResult);
                     }
                     else
                     {
@@ -300,7 +300,7 @@ private static void InitializeLoadedGame(Dictionary<(int, int), char> loadedPiec
         private static void CleanupTempStates()
         {
             IFileSaveLoad fileSaveLoad = FileSaveLoadFactory.GetFileSaveLoadImplementation();
-            fileSaveLoad.DeleteAllTempGameStates("");
+            fileSaveLoad.DeleteAllTempGameStates(0);
         }
     }
 }

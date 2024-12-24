@@ -33,8 +33,8 @@ namespace WebApp.Controllers
                 );
 
                 IFileSaveLoad fileSaveLoad = FileSaveLoadFactory.GetFileSaveLoadImplementation();
-                fileSaveLoad.DeleteAllTempGameStates(request.GameSaveName);
-                fileSaveLoad.SaveTempGameState(positions, grid, request.GameSaveName);
+                fileSaveLoad.DeleteAllTempGameStates(request.GameId);
+                fileSaveLoad.SaveTempGameState(positions, grid, request.GameId);
                 
                 //string saveResult = fileSaveLoad.SaveGameState(new CustomConfig(), positions, grid, request.GameSaveName, string.Empty);
                 return Json(new { success = true });
@@ -71,9 +71,9 @@ namespace WebApp.Controllers
                 if (request.SkipDeleteTempStates != null && request.SkipDeleteTempStates == true) { }
                 else
                 {
-                    fileSaveLoad.DeleteAllTempGameStates(request.GameSaveName);
+                    fileSaveLoad.DeleteAllTempGameStates(request.GameId);
                 }
-                string saveResult = fileSaveLoad.SaveGameState(new CustomConfig(), positions, grid, request.GameSaveName, string.Empty);
+                string saveResult = fileSaveLoad.SaveGameState(new CustomConfig(), positions, grid, request.GameId, string.Empty);
                 return Json(new { success = true });
             }
             catch (Exception ex)

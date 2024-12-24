@@ -9,16 +9,16 @@ public interface IFileSaveLoad
     List<CustomConfig> DisplayAllConfigurations();
 
     string SaveGameState(CustomConfig customConfig, Dictionary<(int, int), char> pieces, Grid grid,
-        string saveName, string configName);
+        int gameId, string configName);
 
-    void SaveTempGameState(Dictionary<(int, int), char> positions, Grid grid, string gameSaveName);
+    void SaveTempGameState(Dictionary<(int, int), char> positions, Grid grid, int gameId);
 
     List<string> DisplayAllGames();
 
-    void SaveInitialGame(string saveName, int configId, string firstPlayerPassword, string secondPlayerPassword);
+    int SaveInitialGame(string saveName, int configId, string firstPlayerPassword, string secondPlayerPassword);
     
-    (CustomConfig config, Dictionary<(int, int), char> pieces, Grid grid) LoadGame(string saveName);
+    (CustomConfig config, Dictionary<(int, int), char> pieces, Grid grid) LoadGame(int saveId);
 
-    void DeleteAllTempGameStates(string GameName);
+    void DeleteAllTempGameStates(int GameId);
 
 }

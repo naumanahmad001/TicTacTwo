@@ -140,10 +140,10 @@ namespace DAL
 
 
         public string SaveGameState(CustomConfig customConfig, Dictionary<(int, int), char> pieces, Grid grid,
-            string saveName, string configName)
+            int gameId, string configName)
         {
 
-            var existingGame = _dbContext.SavedGames.FirstOrDefault(g => g.GameName == saveName);
+            var existingGame = _dbContext.SavedGames.FirstOrDefault(g => g.Id == gameId);
             var config = _dbContext.Configurations.FirstOrDefault(c => c.ConfigName == configName);
 
             try
@@ -223,14 +223,14 @@ namespace DAL
 
 
 
-        public (CustomConfig config, Dictionary<(int, int), char> pieces, Grid grid) LoadGame(string saveName)
+        public (CustomConfig config, Dictionary<(int, int), char> pieces, Grid grid) LoadGame(int saveId)
         {
             var game = _dbContext.SavedGames
-                .FirstOrDefault(g => g.GameName == saveName);
+                .FirstOrDefault(g => g.Id == saveId);
 
             if (game == null)
             {
-                Console.WriteLine($"Game with the name '{saveName}' not found.");
+                Console.WriteLine($"Game with the id '{saveId}' not found.");
                 return (null, null, null);
             }
 
@@ -239,7 +239,7 @@ namespace DAL
 
             if (config == null)
             {
-                Console.WriteLine($"Configuration for game '{saveName}' not found.");
+                Console.WriteLine($"Configuration for id '{saveId}' not found.");
                 return (null, null, null);
             }
 
@@ -296,7 +296,7 @@ namespace DAL
         
         
 
-        public void SaveInitialGame(string saveName, int configId, string firstPlayerPassword, string secondPlayerPassword)
+        public int SaveInitialGame(string saveName, int configId, string firstPlayerPassword, string secondPlayerPassword)
         {
 
             var newGame = new Game
@@ -311,6 +311,7 @@ namespace DAL
 
             _dbContext.SavedGames.Add(newGame);
             _dbContext.SaveChanges();
+            return newGame.Id;
         }
         
         
@@ -322,13 +323,13 @@ namespace DAL
         
         
 
-        public void SaveTempGameState(Dictionary<(int, int), char> positions, Grid grid, string gameSaveName)
+        public void SaveTempGameState(Dictionary<(int, int), char> positions, Grid grid, int gameId)
         {
             var positionsStringKeys = positions.ToDictionary(
                 kvp => $"{kvp.Key.Item1},{kvp.Key.Item2}",
                 kvp => kvp.Value
             );
-            var game = _dbContext.SavedGames.FirstOrDefault(g => g.GameName == gameSaveName);
+            var game = _dbContext.SavedGames.FirstOrDefault(g => g.Id == gameId);
             
 
             var highestMoveNumber = _dbContext.TempStates
@@ -341,7 +342,7 @@ namespace DAL
                 GridTopLeft = $"{grid.TopLeft.Item1},{grid.TopLeft.Item2}",
                 Positions = positionsStringKeys,
                 MoveNumber = moveNumber,
-                GameId = game.GameName
+                GameId = gameId.ToString()
             };
 
 
@@ -351,9 +352,9 @@ namespace DAL
         
         
         
-        public void DeleteAllTempGameStates(string GameName)
+        public void DeleteAllTempGameStates(int GameId)
         {
-            var tempStates = _dbContext.TempStates.Where(a=>a.GameId == GameName).ToList();
+            var tempStates = _dbContext.TempStates.Where(a=>a.GameId == GameId.ToString()).ToList();
             _dbContext.TempStates.RemoveRange(tempStates);
             _dbContext.SaveChanges();
         }

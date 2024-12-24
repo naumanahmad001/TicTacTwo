@@ -38,8 +38,8 @@ namespace WebApp.Pages.TheGame
                 return Page();
             }
             IFileSaveLoad fileSaveLoad = FileSaveLoadFactory.GetFileSaveLoadImplementation();
-            fileSaveLoad.SaveInitialGame(GameName, selectedConfig, FirstPlayerPassword, SecondPlayerPassword);
-            return RedirectToPage("/TheGame/SelectYourPiece", new { gameId = GameName });
+            int gameId = fileSaveLoad.SaveInitialGame(GameName, selectedConfig, FirstPlayerPassword, SecondPlayerPassword);
+            return RedirectToPage("/TheGame/SelectYourPiece", new { gameId = gameId });
         }
     }
 }
